@@ -3,55 +3,32 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
-import { ShieldCheck, LogIn, UserPlus } from 'lucide-react';
+import { ShieldCheck } from 'lucide-react';
 
 export default function LoginPage() {
-  const [mode, setMode] = useState<'signin' | 'signup'>('signin');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [infoMsg, setInfoMsg] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
-  async function handleSubmit(e: React.FormEvent) {
+  async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
     setIsLoading(true);
     setErrorMsg(null);
-    setInfoMsg(null);
 
     const supabase = createClient();
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
 
-    if (mode === 'signin') {
-      const { error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) {
-        setErrorMsg(error.message);
-        setIsLoading(false);
-      } else {
-        router.push('/dashboard');
-        router.refresh();
-      }
+    if (error) {
+      setErrorMsg(error.message);
+      setIsLoading(false);
     } else {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-      });
-
-      if (error) {
-        setErrorMsg(error.message);
-        setIsLoading(false);
-      } else if (data.session) {
-        router.push('/dashboard');
-        router.refresh();
-      } else {
-        setInfoMsg('Account created! Please check your email or sign in below.');
-        setIsLoading(false);
-        setMode('signin');
-      }
+      router.push('/dashboard');
+      router.refresh();
     }
   }
 
@@ -66,44 +43,8 @@ export default function LoginPage() {
             Budget Tracker 2026
           </h1>
           <p className="text-xs text-slate-400">
-            Personal Finance & Allocation PWA
+            Private Personal Finance Sign In
           </p>
-        </div>
-
-        {/* Tab Switcher */}
-        <div className="grid grid-cols-2 gap-1.5 p-1 bg-slate-950 rounded-xl border border-slate-800/80">
-          <button
-            type="button"
-            onClick={() => {
-              setMode('signin');
-              setErrorMsg(null);
-              setInfoMsg(null);
-            }}
-            className={`py-2 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              mode === 'signin'
-                ? 'bg-emerald-600 text-slate-950 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <LogIn className="w-3.5 h-3.5" />
-            Sign In
-          </button>
-          <button
-            type="button"
-            onClick={() => {
-              setMode('signup');
-              setErrorMsg(null);
-              setInfoMsg(null);
-            }}
-            className={`py-2 text-xs font-bold rounded-lg transition-all cursor-pointer flex items-center justify-center gap-1.5 ${
-              mode === 'signup'
-                ? 'bg-emerald-600 text-slate-950 shadow-sm'
-                : 'text-slate-400 hover:text-slate-200'
-            }`}
-          >
-            <UserPlus className="w-3.5 h-3.5" />
-            Create Account
-          </button>
         </div>
 
         {errorMsg && (
@@ -112,13 +53,7 @@ export default function LoginPage() {
           </div>
         )}
 
-        {infoMsg && (
-          <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-medium text-emerald-400">
-            {infoMsg}
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleLogin} className="space-y-4">
           <div>
             <label htmlFor="email" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
               Email Address
@@ -129,7 +64,7 @@ export default function LoginPage() {
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="user@example.com"
+              placeholder="owner@budget2026.local"
               className="w-full px-3.5 py-3 rounded-xl border border-slate-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-sm font-semibold text-slate-100 bg-slate-950 placeholder:text-slate-500"
             />
           </div>
@@ -142,7 +77,6 @@ export default function LoginPage() {
               id="password"
               type="password"
               required
-              minLength={6}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
@@ -155,9 +89,7 @@ export default function LoginPage() {
             disabled={isLoading}
             className="w-full py-3.5 rounded-xl bg-emerald-600 text-slate-950 font-bold text-sm hover:bg-emerald-500 transition-all disabled:opacity-50 shadow-[0_0_16px_rgba(16,185,129,0.3)] cursor-pointer active:scale-[0.99]"
           >
-            {isLoading
-              ? mode === 'signin' ? 'Signing In...' : 'Creating Account...'
-              : mode === 'signin' ? 'Sign In' : 'Create Account'}
+            {isLoading ? 'Signing In...' : 'Sign In'}
           </button>
         </form>
       </div>

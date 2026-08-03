@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useEffect, useTransition } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
 import { getMonthlyReport, MonthlyReportDTO } from '@/lib/services/reports';
-import { Plus, ArrowUpRight, ArrowDownRight, Wallet, PiggyBank, RefreshCw } from 'lucide-react';
+import { ArrowUpRight, ArrowDownRight, Wallet, PiggyBank, RefreshCw } from 'lucide-react';
 
 export default function DashboardPage() {
   const [report, setReport] = useState<MonthlyReportDTO | null>(null);
@@ -11,9 +10,8 @@ export default function DashboardPage() {
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   
   const now = new Date();
-  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+  const [selectedYear] = useState(now.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
-  const [isPending, startTransition] = useTransition();
 
   const loadReport = (year: number, month: number) => {
     setIsLoading(true);
@@ -52,8 +50,9 @@ export default function DashboardPage() {
       <div className="p-6 rounded-2xl bg-rose-50 border border-rose-100 space-y-3 text-center">
         <p className="text-sm font-semibold text-rose-600">{errorMsg}</p>
         <button
+          type="button"
           onClick={() => loadReport(selectedYear, selectedMonth)}
-          className="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-semibold hover:bg-rose-700 transition-colors inline-flex items-center gap-1.5"
+          className="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-semibold hover:bg-rose-700 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
         >
           <RefreshCw className="w-3.5 h-3.5" /> Retry
         </button>
@@ -64,19 +63,19 @@ export default function DashboardPage() {
   const isNegativeAvailable = report && BigInt(report.available_poisha_str) < 0n;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-5 sm:space-y-6">
       {/* Header & Month Selector */}
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 sm:gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
-          <p className="text-sm text-slate-500">Monthly Allocation & Summaries (Asia/Dhaka)</p>
+          <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
+          <p className="text-xs sm:text-sm text-slate-500">Monthly Allocation & Summaries (Asia/Dhaka)</p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="w-full sm:w-auto">
           <select
             value={selectedMonth}
             onChange={handleMonthChange}
-            className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900 cursor-pointer shadow-xs"
+            className="w-full sm:w-auto px-3.5 py-2.5 rounded-xl bg-white border border-slate-200 text-xs sm:text-sm font-bold text-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900 cursor-pointer shadow-xs"
           >
             {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
               <option key={m} value={m}>
@@ -87,84 +86,84 @@ export default function DashboardPage() {
         </div>
       </header>
 
-      {/* 4 Primary Summary Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 4 Primary Summary Cards - Mobile Optimized Grid */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
         {/* Income Card */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-100 shadow-xs flex flex-col justify-between">
+        <div className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-100 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider">Income</span>
-            <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
-              <ArrowUpRight className="w-4 h-4" />
+            <span className="text-[10px] sm:text-xs font-bold text-blue-600 uppercase tracking-wider">Income</span>
+            <div className="p-1.5 sm:p-2 rounded-xl bg-blue-50 text-blue-600">
+              <ArrowUpRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
           </div>
-          <div className="mt-4">
-            <p className="text-2xl font-bold text-slate-900 tracking-tight">{report?.income_bdt || '৳ 0.00'}</p>
+          <div className="mt-3 sm:mt-4">
+            <p className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight truncate">{report?.income_bdt || '৳ 0.00'}</p>
           </div>
         </div>
 
         {/* Expenses Card */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-100 shadow-xs flex flex-col justify-between">
+        <div className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-100 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-rose-600 uppercase tracking-wider">Expenses</span>
-            <div className="p-2 rounded-xl bg-rose-50 text-rose-600">
-              <ArrowDownRight className="w-4 h-4" />
+            <span className="text-[10px] sm:text-xs font-bold text-rose-600 uppercase tracking-wider">Expenses</span>
+            <div className="p-1.5 sm:p-2 rounded-xl bg-rose-50 text-rose-600">
+              <ArrowDownRight className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
           </div>
-          <div className="mt-4">
-            <p className="text-2xl font-bold text-slate-900 tracking-tight">{report?.expenses_bdt || '৳ 0.00'}</p>
-            <p className="text-xs text-slate-400 mt-1">
-              Needs: {report?.needs_bdt} · Wants: {report?.wants_bdt}
+          <div className="mt-3 sm:mt-4">
+            <p className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight truncate">{report?.expenses_bdt || '৳ 0.00'}</p>
+            <p className="text-[10px] sm:text-xs text-slate-400 mt-0.5 truncate">
+              Needs: {report?.needs_bdt}
             </p>
           </div>
         </div>
 
         {/* Saved Card */}
-        <div className="p-5 rounded-2xl bg-white border border-slate-100 shadow-xs flex flex-col justify-between">
+        <div className="p-4 sm:p-5 rounded-2xl bg-white border border-slate-100 shadow-xs flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Saved</span>
-            <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
-              <PiggyBank className="w-4 h-4" />
+            <span className="text-[10px] sm:text-xs font-bold text-emerald-600 uppercase tracking-wider">Saved</span>
+            <div className="p-1.5 sm:p-2 rounded-xl bg-emerald-50 text-emerald-600">
+              <PiggyBank className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
           </div>
-          <div className="mt-4">
-            <p className="text-2xl font-bold text-slate-900 tracking-tight">{report?.savings_bdt || '৳ 0.00'}</p>
-            <p className="text-xs text-emerald-600 font-medium mt-1">
-              {(report?.savings_rate_bp || 0) / 100}% Savings Rate
+          <div className="mt-3 sm:mt-4">
+            <p className="text-lg sm:text-2xl font-bold text-slate-900 tracking-tight truncate">{report?.savings_bdt || '৳ 0.00'}</p>
+            <p className="text-[10px] sm:text-xs text-emerald-600 font-bold mt-0.5">
+              {(report?.savings_rate_bp || 0) / 100}% Rate
             </p>
           </div>
         </div>
 
         {/* Available Card */}
-        <div className={`p-5 rounded-2xl bg-white border shadow-xs flex flex-col justify-between ${
-          isNegativeAvailable ? 'border-rose-300 bg-rose-50/30' : 'border-slate-100'
+        <div className={`p-4 sm:p-5 rounded-2xl bg-white border shadow-xs flex flex-col justify-between ${
+          isNegativeAvailable ? 'border-rose-300 bg-rose-50/40' : 'border-slate-100'
         }`}>
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-600 uppercase tracking-wider">Available</span>
-            <div className={`p-2 rounded-xl ${isNegativeAvailable ? 'bg-rose-100 text-rose-600' : 'bg-slate-100 text-slate-700'}`}>
-              <Wallet className="w-4 h-4" />
+            <span className="text-[10px] sm:text-xs font-bold text-slate-600 uppercase tracking-wider">Available</span>
+            <div className={`p-1.5 sm:p-2 rounded-xl ${isNegativeAvailable ? 'bg-rose-100 text-rose-600' : 'bg-slate-100 text-slate-700'}`}>
+              <Wallet className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
             </div>
           </div>
-          <div className="mt-4">
-            <p className={`text-2xl font-bold tracking-tight ${
+          <div className="mt-3 sm:mt-4">
+            <p className={`text-lg sm:text-2xl font-bold tracking-tight truncate ${
               isNegativeAvailable ? 'text-rose-600' : 'text-slate-900'
             }`}>
               {report?.available_bdt || '৳ 0.00'}
             </p>
-            <p className="text-xs text-slate-400 mt-1">Income - Expenses - Savings</p>
+            <p className="text-[10px] sm:text-xs text-slate-400 mt-0.5">Balance</p>
           </div>
         </div>
       </div>
 
       {/* Allocation Targets Progress */}
-      <div className="p-6 rounded-2xl bg-white border border-slate-100 space-y-5 shadow-xs">
-        <h2 className="text-sm font-semibold text-slate-900">2026 Target Allocations</h2>
+      <div className="p-4 sm:p-6 rounded-2xl bg-white border border-slate-100 space-y-4 sm:space-y-5 shadow-xs">
+        <h2 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wider">2026 Target Allocations</h2>
 
-        <div className="space-y-4">
+        <div className="space-y-3.5">
           {/* Needs Target */}
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <div className="flex justify-between text-xs">
-              <span className="font-semibold text-slate-700">Needs (Target 20%)</span>
-              <span className="text-slate-500 font-medium">
+              <span className="font-bold text-slate-700">Needs (Target 20%)</span>
+              <span className="text-slate-500 font-semibold">
                 {report?.needs_bdt} / {report ? `৳ ${Number(report.needs_target_decimal).toLocaleString('en-BD', { minimumFractionDigits: 2 })}` : '৳ 0.00'}
               </span>
             </div>
@@ -177,10 +176,10 @@ export default function DashboardPage() {
           </div>
 
           {/* Wants Target */}
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <div className="flex justify-between text-xs">
-              <span className="font-semibold text-slate-700">Wants (Target 10%)</span>
-              <span className="text-slate-500 font-medium">
+              <span className="font-bold text-slate-700">Wants (Target 10%)</span>
+              <span className="text-slate-500 font-semibold">
                 {report?.wants_bdt} / {report ? `৳ ${Number(report.wants_target_decimal).toLocaleString('en-BD', { minimumFractionDigits: 2 })}` : '৳ 0.00'}
               </span>
             </div>
@@ -193,10 +192,10 @@ export default function DashboardPage() {
           </div>
 
           {/* Savings Target */}
-          <div className="space-y-1.5">
+          <div className="space-y-1">
             <div className="flex justify-between text-xs">
-              <span className="font-semibold text-slate-700">Savings (Target 70%)</span>
-              <span className="text-slate-500 font-medium">
+              <span className="font-bold text-slate-700">Savings (Target 70%)</span>
+              <span className="text-slate-500 font-semibold">
                 {report?.savings_bdt} / {report ? `৳ ${Number(report.savings_target_decimal).toLocaleString('en-BD', { minimumFractionDigits: 2 })}` : '৳ 0.00'}
               </span>
             </div>
@@ -211,24 +210,24 @@ export default function DashboardPage() {
       </div>
 
       {/* Recent Transactions List */}
-      <div className="p-6 rounded-2xl bg-white border border-slate-100 space-y-4 shadow-xs">
-        <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-900">Recent Transactions</h2>
+      <div className="p-4 sm:p-6 rounded-2xl bg-white border border-slate-100 space-y-3 sm:space-y-4 shadow-xs">
+        <div className="flex items-center justify-between border-b border-slate-100 pb-2">
+          <h2 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wider">Recent Transactions</h2>
         </div>
 
         {!report?.recent_transactions || report.recent_transactions.length === 0 ? (
-          <div className="py-8 text-center space-y-2">
+          <div className="py-6 sm:py-8 text-center space-y-1">
             <p className="text-xs font-medium text-slate-500">No transactions recorded for this month.</p>
           </div>
         ) : (
           <div className="divide-y divide-slate-100">
             {report.recent_transactions.map((t) => (
-              <div key={t.id} className="py-3 flex items-center justify-between text-xs">
+              <div key={t.id} className="py-2.5 sm:py-3 flex items-center justify-between text-xs">
                 <div>
-                  <p className="font-semibold text-slate-800">{t.description}</p>
-                  <p className="text-slate-400">{t.transaction_date}</p>
+                  <p className="font-bold text-slate-900 text-xs sm:text-sm">{t.description}</p>
+                  <p className="text-[10px] sm:text-xs text-slate-400">{t.transaction_date}</p>
                 </div>
-                <div className={`font-bold ${
+                <div className={`font-bold text-xs sm:text-sm ${
                   t.kind === 'income'
                     ? 'text-blue-600'
                     : t.kind === 'saving'

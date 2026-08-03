@@ -2,8 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, ReceiptText, Calendar, Settings } from 'lucide-react';
-import { AddTransactionButton } from '@/components/ui/AddTransactionButton';
+import { LayoutDashboard, ReceiptText, Calendar, Settings, Plus } from 'lucide-react';
 
 interface DesktopSidebarProps {
   onAddTransaction?: () => void;
@@ -30,10 +29,11 @@ export function DesktopSidebar({ onAddTransaction }: DesktopSidebarProps) {
 
       <div className="mb-6">
         <button
+          type="button"
           onClick={onAddTransaction}
           className="w-full flex items-center justify-center gap-2 p-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold transition-colors cursor-pointer"
         >
-          <AddTransactionButton onClick={onAddTransaction} />
+          <Plus className="w-4 h-4" />
           <span>Add Transaction</span>
         </button>
       </div>

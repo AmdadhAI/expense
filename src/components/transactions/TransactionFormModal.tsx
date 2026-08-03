@@ -65,7 +65,6 @@ export function TransactionFormModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [requestId, setRequestId] = useState<string>('');
 
-  // Pre-fill form when editing or creating
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
@@ -83,7 +82,6 @@ export function TransactionFormModal({
         setTransactionDate(new Date().toISOString().split('T')[0]);
         setNote('');
         setShowNote(false);
-        // Default first category of matching kind
         const defaultCat = categories.find((c) => c.kind === 'expense');
         setCategoryId(defaultCat ? defaultCat.id : '');
       }
@@ -93,7 +91,6 @@ export function TransactionFormModal({
     }
   }, [isOpen, initialData, categories]);
 
-  // Update selected category when kind changes
   const availableCategories = categories.filter((c) => c.kind === kind);
 
   const handleKindChange = (newKind: TransactionKind) => {
@@ -108,7 +105,6 @@ export function TransactionFormModal({
     e.preventDefault();
     setErrorMsg(null);
 
-    // Validate decimal string safely without parseFloat
     try {
       parseDecimalToPoisha(amount);
     } catch (err: unknown) {
@@ -153,13 +149,19 @@ export function TransactionFormModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-slate-900/50 p-0 md:p-4 backdrop-blur-xs">
-      <div className="w-full max-w-lg bg-white rounded-t-3xl md:rounded-2xl shadow-xl border border-slate-100 max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-4 border-b border-slate-100 sticky top-0 bg-white z-10">
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-slate-900/60 p-0 md:p-4 backdrop-blur-xs">
+      {/* Background Backdrop Dismiss */}
+      <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
+
+      {/* Modal Surface */}
+      <div className="relative w-full max-w-lg bg-white rounded-t-3xl md:rounded-2xl shadow-2xl border border-slate-100 max-h-[92vh] flex flex-col overflow-hidden z-10 animate-in slide-in-from-bottom duration-200">
+        {/* Sticky Header */}
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-white sticky top-0 z-20">
           <h2 className="text-lg font-bold text-slate-900">
             {initialData?.id ? 'Edit Transaction' : 'Record Transaction'}
           </h2>
           <button
+            type="button"
             onClick={onClose}
             className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors"
           >
@@ -168,31 +170,32 @@ export function TransactionFormModal({
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        {/* Scrollable Form Body */}
+        <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1 pb-12 sm:pb-8">
           {errorMsg && (
-            <div className="p-3 rounded-xl bg-rose-50 border border-rose-100 text-xs font-medium text-rose-600">
+            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-100 text-xs font-semibold text-rose-600">
               {errorMsg}
             </div>
           )}
 
           {/* Kind Selector */}
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
               Transaction Type
             </label>
-            <div className="grid grid-cols-3 gap-2 p-1 bg-slate-100 rounded-xl">
+            <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 rounded-xl">
               {(['expense', 'saving', 'income'] as TransactionKind[]).map((k) => (
                 <button
                   key={k}
                   type="button"
                   onClick={() => handleKindChange(k)}
-                  className={`py-2 text-xs font-semibold rounded-lg capitalize transition-colors ${
+                  className={`py-2.5 text-xs font-bold rounded-lg capitalize transition-all cursor-pointer ${
                     kind === k
                       ? k === 'income'
-                        ? 'bg-blue-600 text-white shadow-xs'
+                        ? 'bg-blue-600 text-white shadow-sm'
                         : k === 'saving'
-                        ? 'bg-emerald-600 text-white shadow-xs'
-                        : 'bg-rose-600 text-white shadow-xs'
+                        ? 'bg-emerald-600 text-white shadow-sm'
+                        : 'bg-rose-600 text-white shadow-sm'
                       : 'text-slate-600 hover:text-slate-900'
                   }`}
                 >
@@ -208,7 +211,7 @@ export function TransactionFormModal({
               Amount (BDT ৳)
             </label>
             <div className="relative">
-              <span className="absolute left-3.5 top-3 text-slate-400 font-bold text-sm">৳</span>
+              <span className="absolute left-3.5 top-3.5 text-slate-700 font-bold text-base select-none">৳</span>
               <input
                 id="amount"
                 type="text"
@@ -217,7 +220,7 @@ export function TransactionFormModal({
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="w-full pl-8 pr-4 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 text-base font-semibold text-slate-900"
+                className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 text-lg font-bold text-slate-900 bg-white"
               />
             </div>
           </div>
@@ -232,7 +235,7 @@ export function TransactionFormModal({
               required
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm bg-white"
+              className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm font-semibold text-slate-900 bg-white cursor-pointer"
             >
               {availableCategories.length === 0 && (
                 <option value="">No categories available</option>
@@ -257,7 +260,7 @@ export function TransactionFormModal({
               placeholder="e.g. Monthly Grocery"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm"
+              className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm font-medium text-slate-900 bg-white"
             />
           </div>
 
@@ -272,7 +275,7 @@ export function TransactionFormModal({
               required
               value={transactionDate}
               onChange={(e) => setTransactionDate(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm bg-white"
+              className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm font-medium text-slate-900 bg-white cursor-pointer"
             />
           </div>
 
@@ -282,7 +285,7 @@ export function TransactionFormModal({
               <button
                 type="button"
                 onClick={() => setShowNote(true)}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-700"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 py-1"
               >
                 <Plus className="w-3.5 h-3.5" /> Add optional note
               </button>
@@ -297,17 +300,18 @@ export function TransactionFormModal({
                   placeholder="Additional transaction details..."
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  className="w-full px-3.5 py-2 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm text-slate-900 bg-white"
                 />
               </div>
             )}
           </div>
 
-          <div className="pt-2">
+          {/* Submit Button Container */}
+          <div className="pt-3 pb-4">
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3 rounded-xl bg-slate-900 text-white font-semibold text-sm hover:bg-slate-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2"
+              className="w-full py-3.5 rounded-xl bg-slate-900 text-white font-bold text-sm hover:bg-slate-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-md cursor-pointer active:scale-[0.99]"
             >
               {isSubmitting ? (
                 'Saving...'

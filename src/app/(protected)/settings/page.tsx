@@ -11,8 +11,8 @@ import {
   archiveCategory,
   CategoryDTO,
 } from '@/lib/services/categories';
-import { TransactionKind, TransactionBucket } from '@/types/database.types';
-import { LogOut, Save, CheckCircle2, AlertCircle, Plus, Pencil, Archive } from 'lucide-react';
+import { TransactionKind } from '@/types/database.types';
+import { LogOut, Save, CheckCircle2, AlertCircle, Plus, Pencil, Archive, KeyRound, ShieldCheck } from 'lucide-react';
 
 export default function SettingsPage() {
   const router = useRouter();
@@ -25,6 +25,14 @@ export default function SettingsPage() {
   const [isSaving, setIsSaving] = useState(false);
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+
+  // Account & Credentials state
+  const [currentUserEmail, setCurrentUserEmail] = useState('');
+  const [newEmail, setNewEmail] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [isUpdatingAuth, setIsUpdatingAuth] = useState(false);
+  const [authSuccessMsg, setAuthSuccessMsg] = useState<string | null>(null);
+  const [authErrorMsg, setAuthErrorMsg] = useState<string | null>(null);
 
   // Categories management state
   const [groupedCategories, setGroupedCategories] = useState<Record<TransactionKind, CategoryDTO[]>>({
@@ -48,6 +56,15 @@ export default function SettingsPage() {
   const loadData = () => {
     setIsLoading(true);
     setErrorMsg(null);
+
+    const supabase = createClient();
+    supabase.auth.getUser().then(({ data }) => {
+      if (data.user?.email) {
+        setCurrentUserEmail(data.user.email);
+        setNewEmail(data.user.email);
+      }
+    });
+
     Promise.all([getBudgetPlanForYear(year), listCategoriesGroupedByKind()])
       .then(([plan, cats]) => {
         setNeedsPercent(plan.needs_bp / 100);
@@ -65,6 +82,55 @@ export default function SettingsPage() {
   useEffect(() => {
     loadData();
   }, [year]);
+
+  async function handleUpdateCredentials(e: React.FormEvent) {
+    e.preventDefault();
+    setAuthSuccessMsg(null);
+    setAuthErrorMsg(null);
+
+    if (!newEmail && !newPassword) {
+      setAuthErrorMsg('Please enter a new email or new password.');
+      return;
+    }
+
+    if (newPassword && newPassword.length < 6) {
+      setAuthErrorMsg('Password must be at least 6 characters long.');
+      return;
+    }
+
+    setIsUpdatingAuth(true);
+    try {
+      const supabase = createClient();
+      const updateData: { email?: string; password?: string } = {};
+      if (newEmail && newEmail !== currentUserEmail) {
+        updateData.email = newEmail;
+      }
+      if (newPassword) {
+        updateData.password = newPassword;
+      }
+
+      if (Object.keys(updateData).length === 0) {
+        setAuthErrorMsg('No changes detected.');
+        setIsUpdatingAuth(false);
+        return;
+      }
+
+      const { data, error } = await supabase.auth.updateUser(updateData);
+      if (error) {
+        throw error;
+      }
+
+      setAuthSuccessMsg('Sign-in credentials updated successfully!');
+      if (data.user?.email) {
+        setCurrentUserEmail(data.user.email);
+      }
+      setNewPassword('');
+      setIsUpdatingAuth(false);
+    } catch (err: unknown) {
+      setAuthErrorMsg((err as Error).message || 'Failed to update credentials');
+      setIsUpdatingAuth(false);
+    }
+  }
 
   async function handleSaveTargets(e: React.FormEvent) {
     e.preventDefault();
@@ -161,8 +227,74 @@ export default function SettingsPage() {
     <div className="space-y-6 max-w-4xl">
       <header>
         <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Settings</h1>
-        <p className="text-sm text-slate-500">Preferences, Categories & Target Allocations</p>
+        <p className="text-sm text-slate-500">Preferences, Security, Categories & Target Allocations</p>
       </header>
+
+      {/* Security & Account Credentials */}
+      <form onSubmit={handleUpdateCredentials} className="p-6 rounded-2xl bg-white border border-slate-100 space-y-4 shadow-xs">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <ShieldCheck className="w-5 h-5 text-slate-900" />
+            <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Account Credentials</h2>
+          </div>
+          <span className="text-xs text-slate-400 font-medium">Supabase Auth</span>
+        </div>
+
+        {authSuccessMsg && (
+          <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-100 text-xs font-medium text-emerald-700 flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4" />
+            {authSuccessMsg}
+          </div>
+        )}
+
+        {authErrorMsg && (
+          <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-100 text-xs font-medium text-rose-600 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4" />
+            {authErrorMsg}
+          </div>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label htmlFor="auth-email" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+              Sign-in Email
+            </label>
+            <input
+              id="auth-email"
+              type="email"
+              required
+              value={newEmail}
+              onChange={(e) => setNewEmail(e.target.value)}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-slate-900 bg-white"
+            />
+          </div>
+
+          <div>
+            <label htmlFor="auth-password" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+              New Password (Optional)
+            </label>
+            <input
+              id="auth-password"
+              type="password"
+              placeholder="Min 6 characters..."
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-slate-900 bg-white"
+            />
+          </div>
+        </div>
+
+        <div className="flex justify-end pt-1">
+          <button
+            type="submit"
+            disabled={isUpdatingAuth}
+            className="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition-colors disabled:opacity-50 inline-flex items-center gap-2 cursor-pointer"
+          >
+            <KeyRound className="w-4 h-4" />
+            {isUpdatingAuth ? 'Updating...' : 'Update Credentials'}
+          </button>
+        </div>
+      </form>
 
       {/* Application Defaults */}
       <div className="p-6 rounded-2xl bg-white border border-slate-100 space-y-4 shadow-xs">

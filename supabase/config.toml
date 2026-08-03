@@ -3,3 +3,18 @@ project_id = "budget-tracker-2026"
 
 [auth]
 enable_signup = false
+
+[analytics]
+enabled = false
+
+[vector]
+enabled = false
+
+[storage]
+enabled = false
+
+[realtime]
+enabled = false
+
+[inbucket]
+enabled = false

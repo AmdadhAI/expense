@@ -1,8 +1,8 @@
 {
   "eslint.config.mjs": {
-    "mtime": 1785758390.806367,
-    "ast_hash": "8c3e769ce3a1864585299587e8785599",
-    "semantic_hash": "8c3e769ce3a1864585299587e8785599"
+    "mtime": 1785760510.4338968,
+    "ast_hash": "6b2860fbd8b63c92d7eb63a1fe2107a1",
+    "semantic_hash": "6b2860fbd8b63c92d7eb63a1fe2107a1"
   },
   "next-env.d.ts": {
     "mtime": 1785758403.6611214,
@@ -115,18 +115,78 @@
     "semantic_hash": "8d568a0c7ee5539f71680fb94a09000c"
   },
   "src/types/database.types.ts": {
-    "mtime": 1785757670.9126813,
-    "ast_hash": "59eddd326fbe7daccb5134350f55c195",
-    "semantic_hash": "59eddd326fbe7daccb5134350f55c195"
+    "mtime": 1785760497.6539166,
+    "ast_hash": "6a15c75453ab1bcbd2c09c258e70845e",
+    "semantic_hash": "6a15c75453ab1bcbd2c09c258e70845e"
   },
   "supabase/migrations/20260803000000_foundation_schema.sql": {
-    "mtime": 1785757667.6739001,
-    "ast_hash": "0e5efb877ad91c4d69a7c4fd77db70f0",
-    "semantic_hash": "0e5efb877ad91c4d69a7c4fd77db70f0"
+    "mtime": 1785760096.8685093,
+    "ast_hash": "f846919eb451cae2cb96e806731553b2",
+    "semantic_hash": "f846919eb451cae2cb96e806731553b2"
   },
   "tsconfig.json": {
     "mtime": 1785758403.6599367,
     "ast_hash": "a80e217419a3d09938685afecdc2deb8",
     "semantic_hash": "a80e217419a3d09938685afecdc2deb8"
+  },
+  "src/lib/money.ts": {
+    "mtime": 1785760418.8287323,
+    "ast_hash": "d2a9fd62126aefa244cafdf210c1106c",
+    "semantic_hash": "d2a9fd62126aefa244cafdf210c1106c"
+  },
+  "src/lib/services/backend.test.ts": {
+    "mtime": 1785760465.4059103,
+    "ast_hash": "b6f46514d0bd06a9d67dc8b24efdef9e",
+    "semantic_hash": "b6f46514d0bd06a9d67dc8b24efdef9e"
+  },
+  "src/lib/services/budget-plans.ts": {
+    "mtime": 1785760445.7106686,
+    "ast_hash": "80a58485933fcff30e1b80014fac6182",
+    "semantic_hash": "80a58485933fcff30e1b80014fac6182"
+  },
+  "src/lib/services/categories.ts": {
+    "mtime": 1785760442.7061212,
+    "ast_hash": "b3be51099cebbe1d933fe551854f8d92",
+    "semantic_hash": "b3be51099cebbe1d933fe551854f8d92"
+  },
+  "src/lib/services/monthly-notes.ts": {
+    "mtime": 1785760449.0877066,
+    "ast_hash": "633d9acbd58bd7eb7a0dc7deb7c19fc3",
+    "semantic_hash": "633d9acbd58bd7eb7a0dc7deb7c19fc3"
+  },
+  "src/lib/services/reports.ts": {
+    "mtime": 1785760457.0017629,
+    "ast_hash": "9ddb7eccf06505d58c6e5b57edc36a36",
+    "semantic_hash": "9ddb7eccf06505d58c6e5b57edc36a36"
+  },
+  "src/lib/services/transactions.ts": {
+    "mtime": 1785760438.8304892,
+    "ast_hash": "b25427fcd316f15ed1ae164037c3c77a",
+    "semantic_hash": "b25427fcd316f15ed1ae164037c3c77a"
+  },
+  "src/lib/validations/budget-plan.ts": {
+    "mtime": 1785760428.291763,
+    "ast_hash": "0705c1e983ed31084aa888892a2ed40d",
+    "semantic_hash": "0705c1e983ed31084aa888892a2ed40d"
+  },
+  "src/lib/validations/category.ts": {
+    "mtime": 1785760425.2622094,
+    "ast_hash": "205bcd316b70e090a7bf7b01aabfd1b7",
+    "semantic_hash": "205bcd316b70e090a7bf7b01aabfd1b7"
+  },
+  "src/lib/validations/monthly-note.ts": {
+    "mtime": 1785760432.5461574,
+    "ast_hash": "b5cecce8473bcb8e77f966c0f879adcd",
+    "semantic_hash": "b5cecce8473bcb8e77f966c0f879adcd"
+  },
+  "src/lib/validations/transaction.ts": {
+    "mtime": 1785760422.0584698,
+    "ast_hash": "6c7124394e9307490800254e40fac9a9",
+    "semantic_hash": "6c7124394e9307490800254e40fac9a9"
+  },
+  "vitest.config.ts": {
+    "mtime": 1785760474.6436286,
+    "ast_hash": "39d4431fb7134664db47698f19aa485d",
+    "semantic_hash": "39d4431fb7134664db47698f19aa485d"
   }
 }

@@ -1,3 +1,8 @@
+export type TransactionKind = 'income' | 'expense' | 'saving';
+export type ExpenseBucket = 'needs' | 'wants';
+export type SavingBucket = 'savings';
+export type TransactionBucket = ExpenseBucket | SavingBucket | null;
+
 export type Json =
   | string
   | number
@@ -6,186 +11,187 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[]
 
-export type TransactionKind = 'income' | 'expense' | 'saving';
-export type ExpenseBucket = 'needs' | 'wants';
-export type SavingBucket = 'savings';
-export type TransactionBucket = ExpenseBucket | SavingBucket | null;
-
-export interface Database {
+export type Database = {
+  // Allows to automatically instantiate createClient with right options
+  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
+  __InternalSupabase: {
+    PostgrestVersion: "14.15"
+  }
   public: {
     Tables: {
-      profiles: {
+      budget_plans: {
         Row: {
-          id: string
-          currency: string
-          timezone: string
           created_at: string
+          needs_bp: number
+          savings_bp: number
           updated_at: string
+          user_id: string
+          wants_bp: number
+          year: number
         }
         Insert: {
-          id: string
-          currency?: string
-          timezone?: string
           created_at?: string
+          needs_bp: number
+          savings_bp: number
           updated_at?: string
+          user_id: string
+          wants_bp: number
+          year: number
         }
         Update: {
-          id?: string
-          currency?: string
-          timezone?: string
           created_at?: string
+          needs_bp?: number
+          savings_bp?: number
           updated_at?: string
+          user_id?: string
+          wants_bp?: number
+          year?: number
         }
         Relationships: []
       }
       categories: {
         Row: {
-          id: string
-          user_id: string
-          name: string
-          kind: TransactionKind
-          default_bucket: TransactionBucket
-          is_active: boolean
           created_at: string
+          default_bucket: string | null
+          id: string
+          is_active: boolean
+          kind: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          default_bucket?: string | null
+          id?: string
+          is_active?: boolean
+          kind: string
+          name: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          default_bucket?: string | null
+          id?: string
+          is_active?: boolean
+          kind?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      monthly_notes: {
+        Row: {
+          created_at: string
+          month: number
+          note: string
+          updated_at: string
+          user_id: string
+          year: number
+        }
+        Insert: {
+          created_at?: string
+          month: number
+          note?: string
+          updated_at?: string
+          user_id: string
+          year: number
+        }
+        Update: {
+          created_at?: string
+          month?: number
+          note?: string
+          updated_at?: string
+          user_id?: string
+          year?: number
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          currency: string
+          id: string
+          timezone: string
           updated_at: string
         }
         Insert: {
-          id?: string
-          user_id: string
-          name: string
-          kind: TransactionKind
-          default_bucket?: TransactionBucket
-          is_active?: boolean
           created_at?: string
+          currency?: string
+          id: string
+          timezone?: string
           updated_at?: string
         }
         Update: {
-          id?: string
-          user_id?: string
-          name?: string
-          kind?: TransactionKind
-          default_bucket?: TransactionBucket
-          is_active?: boolean
           created_at?: string
+          currency?: string
+          id?: string
+          timezone?: string
           updated_at?: string
         }
         Relationships: []
       }
       transactions: {
         Row: {
-          id: string
-          user_id: string
-          kind: TransactionKind
-          amount_poisha: number | bigint
-          description: string
-          transaction_date: string
+          amount_poisha: number
+          bucket: string | null
           category_id: string
-          bucket: TransactionBucket
-          note: string | null
           created_at: string
+          description: string
+          id: string
+          kind: string
+          note: string | null
+          request_id: string | null
+          transaction_date: string
           updated_at: string
+          user_id: string
         }
         Insert: {
-          id?: string
-          user_id: string
-          kind: TransactionKind
-          amount_poisha: number | bigint
-          description: string
-          transaction_date: string
+          amount_poisha: number
+          bucket?: string | null
           category_id: string
-          bucket?: TransactionBucket
-          note?: string | null
           created_at?: string
+          description: string
+          id?: string
+          kind: string
+          note?: string | null
+          request_id?: string | null
+          transaction_date: string
           updated_at?: string
+          user_id: string
         }
         Update: {
-          id?: string
-          user_id?: string
-          kind?: TransactionKind
-          amount_poisha?: number | bigint
-          description?: string
-          transaction_date?: string
+          amount_poisha?: number
+          bucket?: string | null
           category_id?: string
-          bucket?: TransactionBucket
-          note?: string | null
           created_at?: string
+          description?: string
+          id?: string
+          kind?: string
+          note?: string | null
+          request_id?: string | null
+          transaction_date?: string
           updated_at?: string
+          user_id?: string
         }
         Relationships: [
           {
             foreignKeyName: "transactions_category_composite_fk"
             columns: ["category_id", "user_id", "kind"]
+            isOneToOne: false
             referencedRelation: "categories"
             referencedColumns: ["id", "user_id", "kind"]
-          }
+          },
         ]
-      }
-      budget_plans: {
-        Row: {
-          user_id: string
-          year: number
-          needs_bp: number
-          wants_bp: number
-          savings_bp: number
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          user_id: string
-          year: number
-          needs_bp?: number
-          wants_bp?: number
-          savings_bp?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          user_id?: string
-          year?: number
-          needs_bp?: number
-          wants_bp?: number
-          savings_bp?: number
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
-      }
-      monthly_notes: {
-        Row: {
-          user_id: string
-          year: number
-          month: number
-          note: string
-          created_at: string
-          updated_at: string
-        }
-        Insert: {
-          user_id: string
-          year: number
-          month: number
-          note?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Update: {
-          user_id?: string
-          year?: number
-          month?: number
-          note?: string
-          created_at?: string
-          updated_at?: string
-        }
-        Relationships: []
       }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      onboard_user: {
-        Args: Record<PropertyKey, never>
-        Returns: void
-      }
+      onboard_user: { Args: Record<PropertyKey, never>; Returns: undefined }
     }
     Enums: {
       [_ in never]: never

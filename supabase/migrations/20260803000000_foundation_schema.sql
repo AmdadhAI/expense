@@ -18,9 +18,11 @@ CREATE TABLE IF NOT EXISTS public.categories (
   is_active boolean NOT NULL DEFAULT true,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
-  CONSTRAINT categories_user_name_kind_key UNIQUE (user_id, lower(name), kind),
   CONSTRAINT categories_composite_key UNIQUE (id, user_id, kind)
 );
+
+-- Case-insensitive unique index per user and kind
+CREATE UNIQUE INDEX IF NOT EXISTS categories_user_name_kind_idx ON public.categories (user_id, lower(name), kind);
 
 CREATE TABLE IF NOT EXISTS public.transactions (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -32,6 +34,7 @@ CREATE TABLE IF NOT EXISTS public.transactions (
   category_id uuid NOT NULL,
   bucket text CHECK (bucket IN ('needs', 'wants', 'savings') OR bucket IS NULL),
   note text,
+  request_id text,
   created_at timestamptz NOT NULL DEFAULT now(),
   updated_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT transactions_kind_bucket_check CHECK (
@@ -42,6 +45,9 @@ CREATE TABLE IF NOT EXISTS public.transactions (
   CONSTRAINT transactions_category_composite_fk FOREIGN KEY (category_id, user_id, kind)
     REFERENCES public.categories(id, user_id, kind) ON DELETE RESTRICT
 );
+
+-- Idempotency unique index for transactions (user_id, request_id)
+CREATE UNIQUE INDEX IF NOT EXISTS transactions_user_request_id_idx ON public.transactions (user_id, request_id) WHERE request_id IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS public.budget_plans (
   user_id uuid NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,

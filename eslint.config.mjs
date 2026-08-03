@@ -2,6 +2,9 @@ import js from '@eslint/js';
 import globals from 'globals';
 
 export default [
+  {
+    ignores: ['.next/**', '.next', 'node_modules/**', 'dist/**', 'coverage/**'],
+  },
   js.configs.recommended,
   {
     languageOptions: {
@@ -14,6 +17,5 @@ export default [
     rules: {
       'no-unused-vars': ['error', { argsIgnorePattern: '^_', varsIgnorePattern: '^_', caughtErrorsIgnorePattern: '^_' }],
     },
-    ignores: ['.next/**', 'node_modules/**', 'dist/**'],
   },
 ];

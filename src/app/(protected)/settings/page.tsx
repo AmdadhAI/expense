@@ -4,11 +4,19 @@ import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 import { getBudgetPlanForYear, updateBudgetPlan } from '@/lib/services/budget-plans';
-import { LogOut, Save, CheckCircle2, AlertCircle } from 'lucide-react';
+import {
+  listCategoriesGroupedByKind,
+  createCategory,
+  updateCategory,
+  archiveCategory,
+  CategoryDTO,
+} from '@/lib/services/categories';
+import { TransactionKind, TransactionBucket } from '@/types/database.types';
+import { LogOut, Save, CheckCircle2, AlertCircle, Plus, Pencil, Archive } from 'lucide-react';
 
 export default function SettingsPage() {
   const router = useRouter();
-  const [year, setYear] = useState(2026);
+  const [year] = useState(2026);
   const [needsPercent, setNeedsPercent] = useState(20);
   const [wantsPercent, setWantsPercent] = useState(10);
   const [savingsPercent, setSavingsPercent] = useState(70);
@@ -18,20 +26,44 @@ export default function SettingsPage() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  useEffect(() => {
+  // Categories management state
+  const [groupedCategories, setGroupedCategories] = useState<Record<TransactionKind, CategoryDTO[]>>({
+    income: [],
+    expense: [],
+    saving: [],
+  });
+  const [catSuccessMsg, setCatSuccessMsg] = useState<string | null>(null);
+  const [catErrorMsg, setCatErrorMsg] = useState<string | null>(null);
+
+  // New Category state
+  const [newCatName, setNewCatName] = useState('');
+  const [newCatKind, setNewCatKind] = useState<TransactionKind>('expense');
+  const [newCatBucket, setNewCatBucket] = useState<'needs' | 'wants'>('needs');
+  const [isCreatingCat, setIsCreatingCat] = useState(false);
+
+  // Editing Category state
+  const [editingCatId, setEditingCatId] = useState<string | null>(null);
+  const [editingCatName, setEditingCatName] = useState('');
+
+  const loadData = () => {
     setIsLoading(true);
     setErrorMsg(null);
-    getBudgetPlanForYear(year)
-      .then((plan) => {
+    Promise.all([getBudgetPlanForYear(year), listCategoriesGroupedByKind()])
+      .then(([plan, cats]) => {
         setNeedsPercent(plan.needs_bp / 100);
         setWantsPercent(plan.wants_bp / 100);
         setSavingsPercent(plan.savings_bp / 100);
+        setGroupedCategories(cats);
         setIsLoading(false);
       })
       .catch((err: unknown) => {
-        setErrorMsg((err as Error).message || 'Failed to load budget plan');
+        setErrorMsg((err as Error).message || 'Failed to load settings data');
         setIsLoading(false);
       });
+  };
+
+  useEffect(() => {
+    loadData();
   }, [year]);
 
   async function handleSaveTargets(e: React.FormEvent) {
@@ -62,6 +94,62 @@ export default function SettingsPage() {
     }
   }
 
+  async function handleCreateCategory(e: React.FormEvent) {
+    e.preventDefault();
+    if (!newCatName.trim()) return;
+    setCatSuccessMsg(null);
+    setCatErrorMsg(null);
+
+    try {
+      await createCategory({
+        name: newCatName.trim(),
+        kind: newCatKind,
+        default_bucket: newCatKind === 'expense' ? newCatBucket : newCatKind === 'saving' ? 'savings' : null,
+      });
+      setCatSuccessMsg(`Category "${newCatName.trim()}" created!`);
+      setNewCatName('');
+      setIsCreatingCat(false);
+      loadData();
+      router.refresh();
+    } catch (err: unknown) {
+      setCatErrorMsg((err as Error).message || 'Failed to create category');
+    }
+  }
+
+  async function handleUpdateCategory(id: string) {
+    if (!editingCatName.trim()) return;
+    setCatSuccessMsg(null);
+    setCatErrorMsg(null);
+
+    try {
+      await updateCategory({
+        id,
+        name: editingCatName.trim(),
+      });
+      setCatSuccessMsg('Category updated successfully!');
+      setEditingCatId(null);
+      setEditingCatName('');
+      loadData();
+      router.refresh();
+    } catch (err: unknown) {
+      setCatErrorMsg((err as Error).message || 'Failed to update category');
+    }
+  }
+
+  async function handleArchiveCategory(id: string) {
+    setCatSuccessMsg(null);
+    setCatErrorMsg(null);
+
+    try {
+      await archiveCategory(id);
+      setCatSuccessMsg('Category archived successfully!');
+      loadData();
+      router.refresh();
+    } catch (err: unknown) {
+      setCatErrorMsg((err as Error).message || 'Failed to archive category');
+    }
+  }
+
   async function handleSignOut() {
     const supabase = createClient();
     await supabase.auth.signOut();
@@ -70,15 +158,15 @@ export default function SettingsPage() {
   }
 
   return (
-    <div className="space-y-6 max-w-3xl">
+    <div className="space-y-6 max-w-4xl">
       <header>
         <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Settings</h1>
-        <p className="text-sm text-slate-500">Preferences & Target Allocations</p>
+        <p className="text-sm text-slate-500">Preferences, Categories & Target Allocations</p>
       </header>
 
       {/* Application Defaults */}
       <div className="p-6 rounded-2xl bg-white border border-slate-100 space-y-4 shadow-xs">
-        <h2 className="text-sm font-semibold text-slate-900">Application Environment</h2>
+        <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Application Environment</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
           <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100">
             <span className="text-slate-400 font-medium">Currency</span>
@@ -94,8 +182,8 @@ export default function SettingsPage() {
       {/* Editable Allocation Targets */}
       <form onSubmit={handleSaveTargets} className="p-6 rounded-2xl bg-white border border-slate-100 space-y-5 shadow-xs">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-slate-900">2026 Annual Target Allocations</h2>
-          <span className="text-xs text-slate-400">Must total exactly 100%</span>
+          <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">2026 Target Allocations</h2>
+          <span className="text-xs text-slate-400 font-medium">Must total 100%</span>
         </div>
 
         {successMsg && (
@@ -176,7 +264,7 @@ export default function SettingsPage() {
           <button
             type="submit"
             disabled={isSaving || isLoading}
-            className="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-semibold text-xs hover:bg-slate-800 transition-colors disabled:opacity-50 inline-flex items-center gap-2"
+            className="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition-colors disabled:opacity-50 inline-flex items-center gap-2 cursor-pointer"
           >
             <Save className="w-4 h-4" />
             {isSaving ? 'Saving...' : 'Save Targets'}
@@ -184,16 +272,196 @@ export default function SettingsPage() {
         </div>
       </form>
 
+      {/* Category Management Section */}
+      <div className="p-6 rounded-2xl bg-white border border-slate-100 space-y-5 shadow-xs">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Category Management</h2>
+            <p className="text-xs text-slate-400">Add, rename, or archive transaction categories</p>
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setIsCreatingCat(!isCreatingCat)}
+            className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            {isCreatingCat ? 'Cancel' : 'Add Category'}
+          </button>
+        </div>
+
+        {catSuccessMsg && (
+          <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-100 text-xs font-medium text-emerald-700 flex items-center gap-2">
+            <CheckCircle2 className="w-4 h-4" />
+            {catSuccessMsg}
+          </div>
+        )}
+
+        {catErrorMsg && (
+          <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-100 text-xs font-medium text-rose-600 flex items-center gap-2">
+            <AlertCircle className="w-4 h-4" />
+            {catErrorMsg}
+          </div>
+        )}
+
+        {/* Add Category Form */}
+        {isCreatingCat && (
+          <form onSubmit={handleCreateCategory} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+            <h3 className="text-xs font-bold text-slate-900">Create New Category</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div>
+                <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Name</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Dining"
+                  value={newCatName}
+                  onChange={(e) => setNewCatName(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold bg-white"
+                />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Type</label>
+                <select
+                  value={newCatKind}
+                  onChange={(e) => setNewCatKind(e.target.value as TransactionKind)}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold bg-white cursor-pointer"
+                >
+                  <option value="expense">Expense</option>
+                  <option value="saving">Saving</option>
+                  <option value="income">Income</option>
+                </select>
+              </div>
+
+              {newCatKind === 'expense' ? (
+                <div>
+                  <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Bucket</label>
+                  <select
+                    value={newCatBucket}
+                    onChange={(e) => setNewCatBucket(e.target.value as 'needs' | 'wants')}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold bg-white cursor-pointer"
+                  >
+                    <option value="needs">Needs</option>
+                    <option value="wants">Wants</option>
+                  </select>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Bucket</label>
+                  <input
+                    type="text"
+                    disabled
+                    value={newCatKind === 'saving' ? 'savings' : 'None'}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold bg-slate-100 text-slate-500"
+                  />
+                </div>
+              )}
+            </div>
+
+            <div className="flex justify-end pt-1">
+              <button
+                type="submit"
+                className="px-4 py-2 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800 transition-colors cursor-pointer"
+              >
+                Create Category
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* Grouped Category Lists */}
+        <div className="space-y-4">
+          {(['expense', 'saving', 'income'] as TransactionKind[]).map((kind) => {
+            const list = groupedCategories[kind] || [];
+            return (
+              <div key={kind} className="space-y-2">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 capitalize flex items-center justify-between">
+                  <span>{kind} Categories ({list.length})</span>
+                </h3>
+
+                {list.length === 0 ? (
+                  <p className="text-xs text-slate-400 italic">No active categories for {kind}.</p>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                    {list.map((c) => (
+                      <div
+                        key={c.id}
+                        className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between text-xs"
+                      >
+                        {editingCatId === c.id ? (
+                          <div className="flex items-center gap-2 w-full">
+                            <input
+                              type="text"
+                              value={editingCatName}
+                              onChange={(e) => setEditingCatName(e.target.value)}
+                              className="w-full px-2 py-1 text-xs font-bold rounded border border-slate-300 bg-white"
+                            />
+                            <button
+                              onClick={() => handleUpdateCategory(c.id)}
+                              className="px-2 py-1 bg-slate-900 text-white rounded font-bold hover:bg-slate-800"
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={() => setEditingCatId(null)}
+                              className="px-2 py-1 text-slate-500 hover:text-slate-700"
+                            >
+                              Cancel
+                            </button>
+                          </div>
+                        ) : (
+                          <>
+                            <div className="flex items-center gap-2">
+                              <span className="font-bold text-slate-900">{c.name}</span>
+                              {c.default_bucket && (
+                                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-slate-200 text-slate-700">
+                                  {c.default_bucket}
+                                </span>
+                              )}
+                            </div>
+
+                            <div className="flex items-center gap-1">
+                              <button
+                                onClick={() => {
+                                  setEditingCatId(c.id);
+                                  setEditingCatName(c.name);
+                                }}
+                                className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-200 rounded-md transition-colors"
+                                title="Rename"
+                              >
+                                <Pencil className="w-3.5 h-3.5" />
+                              </button>
+                              <button
+                                onClick={() => handleArchiveCategory(c.id)}
+                                className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
+                                title="Archive"
+                              >
+                                <Archive className="w-3.5 h-3.5" />
+                              </button>
+                            </div>
+                          </>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
       {/* Account Session Sign Out */}
       <div className="p-6 rounded-2xl bg-white border border-slate-100 shadow-xs flex items-center justify-between">
         <div>
-          <h2 className="text-sm font-semibold text-slate-900">Session Management</h2>
+          <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Session Management</h2>
           <p className="text-xs text-slate-400">Sign out of your private personal budget session</p>
         </div>
 
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-50 text-rose-600 font-semibold text-xs hover:bg-rose-100 transition-colors cursor-pointer"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-50 text-rose-600 font-bold text-xs hover:bg-rose-100 transition-colors cursor-pointer"
         >
           <LogOut className="w-4 h-4" />
           Sign Out

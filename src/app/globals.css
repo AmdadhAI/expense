@@ -15,7 +15,6 @@ input, select, textarea {
   background-color: #ffffff;
   border: 1px solid #e2e8f0;
   border-radius: 0.75rem;
-  padding: 0.625rem 0.875rem;
   outline: none;
   box-sizing: border-box;
 }

@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { X, Plus, Check } from 'lucide-react';
 import { TransactionKind, TransactionBucket } from '@/types/database.types';
 import { parseDecimalToPoisha } from '@/lib/money';
+import { createCategory } from '@/lib/services/categories';
 
 export interface CategoryOption {
   id: string;
@@ -65,6 +66,16 @@ export function TransactionFormModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [requestId, setRequestId] = useState<string>('');
 
+  // Inline Category creation state
+  const [isCreatingCategory, setIsCreatingCategory] = useState(false);
+  const [newCatName, setNewCatName] = useState('');
+  const [newCatBucket, setNewCatBucket] = useState<'needs' | 'wants'>('needs');
+  const [localCategories, setLocalCategories] = useState<CategoryOption[]>(categories);
+
+  useEffect(() => {
+    setLocalCategories(categories);
+  }, [categories]);
+
   useEffect(() => {
     if (isOpen) {
       if (initialData) {
@@ -82,21 +93,48 @@ export function TransactionFormModal({
         setTransactionDate(new Date().toISOString().split('T')[0]);
         setNote('');
         setShowNote(false);
-        const defaultCat = categories.find((c) => c.kind === 'expense');
+        const defaultCat = localCategories.find((c) => c.kind === 'expense');
         setCategoryId(defaultCat ? defaultCat.id : '');
       }
+      setIsCreatingCategory(false);
+      setNewCatName('');
       setErrorMsg(null);
       setIsSubmitting(false);
       setRequestId(crypto.randomUUID());
     }
-  }, [isOpen, initialData, categories]);
+  }, [isOpen, initialData, localCategories]);
 
-  const availableCategories = categories.filter((c) => c.kind === kind);
+  const availableCategories = localCategories.filter((c) => c.kind === kind);
 
   const handleKindChange = (newKind: TransactionKind) => {
     setKind(newKind);
-    const firstCat = categories.find((c) => c.kind === newKind);
+    const firstCat = localCategories.find((c) => c.kind === newKind);
     setCategoryId(firstCat ? firstCat.id : '');
+    setIsCreatingCategory(false);
+  };
+
+  const handleAddCategory = async () => {
+    if (!newCatName.trim()) return;
+    setErrorMsg(null);
+    try {
+      const created = await createCategory({
+        name: newCatName.trim(),
+        kind,
+        default_bucket: kind === 'expense' ? newCatBucket : kind === 'saving' ? 'savings' : null,
+      });
+      const newOpt: CategoryOption = {
+        id: created.id,
+        name: created.name,
+        kind: created.kind,
+        default_bucket: created.default_bucket,
+      };
+      setLocalCategories((prev) => [...prev, newOpt]);
+      setCategoryId(created.id);
+      setIsCreatingCategory(false);
+      setNewCatName('');
+    } catch (err: unknown) {
+      setErrorMsg((err as Error).message || 'Failed to create category');
+    }
   };
 
   if (!isOpen) return null;
@@ -113,7 +151,7 @@ export function TransactionFormModal({
     }
 
     if (!categoryId) {
-      setErrorMsg('Please select a valid category');
+      setErrorMsg('Please select or add a category');
       return;
     }
 
@@ -150,10 +188,8 @@ export function TransactionFormModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-slate-900/60 p-0 md:p-4 backdrop-blur-xs">
-      {/* Background Backdrop Dismiss */}
       <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
 
-      {/* Modal Surface */}
       <div className="relative w-full max-w-lg bg-white rounded-t-3xl md:rounded-2xl shadow-2xl border border-slate-100 max-h-[92vh] flex flex-col overflow-hidden z-10 animate-in slide-in-from-bottom duration-200">
         {/* Sticky Header */}
         <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-white sticky top-0 z-20">
@@ -170,8 +206,8 @@ export function TransactionFormModal({
           </button>
         </div>
 
-        {/* Scrollable Form Body */}
-        <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4 overflow-y-auto flex-1 pb-12 sm:pb-8">
+        {/* Scrollable Form */}
+        <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4.5 overflow-y-auto flex-1 pb-12 sm:pb-8">
           {errorMsg && (
             <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-100 text-xs font-semibold text-rose-600">
               {errorMsg}
@@ -205,13 +241,13 @@ export function TransactionFormModal({
             </div>
           </div>
 
-          {/* Amount Input */}
+          {/* Amount Input with Fixed Padding */}
           <div>
             <label htmlFor="amount" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
               Amount (BDT ৳)
             </label>
-            <div className="relative">
-              <span className="absolute left-3.5 top-3.5 text-slate-700 font-bold text-base select-none">৳</span>
+            <div className="relative flex items-center">
+              <span className="absolute left-3.5 text-slate-700 font-bold text-base pointer-events-none select-none">৳</span>
               <input
                 id="amount"
                 type="text"
@@ -220,32 +256,85 @@ export function TransactionFormModal({
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="w-full pl-9 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 text-lg font-bold text-slate-900 bg-white"
+                className="w-full !pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 text-lg font-bold text-slate-900 bg-white"
               />
             </div>
           </div>
 
-          {/* Category Dropdown */}
+          {/* Category Selector + Quick Add */}
           <div>
-            <label htmlFor="category" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
-              Category
-            </label>
-            <select
-              id="category"
-              required
-              value={categoryId}
-              onChange={(e) => setCategoryId(e.target.value)}
-              className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm font-semibold text-slate-900 bg-white cursor-pointer"
-            >
-              {availableCategories.length === 0 && (
-                <option value="">No categories available</option>
-              )}
-              {availableCategories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name} {c.default_bucket ? `(${c.default_bucket})` : ''}
-                </option>
-              ))}
-            </select>
+            <div className="flex items-center justify-between mb-1">
+              <label htmlFor="category" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                Category
+              </label>
+              <button
+                type="button"
+                onClick={() => setIsCreatingCategory(!isCreatingCategory)}
+                className="text-xs font-bold text-slate-900 hover:text-slate-700 inline-flex items-center gap-1 cursor-pointer"
+              >
+                <Plus className="w-3.5 h-3.5" />
+                {isCreatingCategory ? 'Cancel' : 'New Category'}
+              </button>
+            </div>
+
+            {isCreatingCategory ? (
+              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2.5">
+                <input
+                  type="text"
+                  placeholder="Category Name (e.g. Dining)"
+                  value={newCatName}
+                  onChange={(e) => setNewCatName(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-medium bg-white"
+                />
+                {kind === 'expense' && (
+                  <div className="flex items-center gap-2">
+                    <span className="text-xs font-medium text-slate-500">Bucket:</span>
+                    <button
+                      type="button"
+                      onClick={() => setNewCatBucket('needs')}
+                      className={`px-3 py-1 text-xs font-bold rounded-md ${
+                        newCatBucket === 'needs' ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-700'
+                      }`}
+                    >
+                      Needs
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setNewCatBucket('wants')}
+                      className={`px-3 py-1 text-xs font-bold rounded-md ${
+                        newCatBucket === 'wants' ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-700'
+                      }`}
+                    >
+                      Wants
+                    </button>
+                  </div>
+                )}
+                <button
+                  type="button"
+                  onClick={handleAddCategory}
+                  className="w-full py-2 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800"
+                >
+                  Create & Select Category
+                </button>
+              </div>
+            ) : (
+              <select
+                id="category"
+                required
+                value={categoryId}
+                onChange={(e) => setCategoryId(e.target.value)}
+                className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm font-semibold text-slate-900 bg-white cursor-pointer"
+              >
+                {availableCategories.length === 0 && (
+                  <option value="">No categories available</option>
+                )}
+                {availableCategories.map((c) => (
+                  <option key={c.id} value={c.id}>
+                    {c.name} {c.default_bucket ? `(${c.default_bucket})` : ''}
+                  </option>
+                ))}
+              </select>
+            )}
           </div>
 
           {/* Description */}
@@ -285,7 +374,7 @@ export function TransactionFormModal({
               <button
                 type="button"
                 onClick={() => setShowNote(true)}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 py-1"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 py-1 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" /> Add optional note
               </button>
@@ -306,7 +395,7 @@ export function TransactionFormModal({
             )}
           </div>
 
-          {/* Submit Button Container */}
+          {/* Submit Button */}
           <div className="pt-3 pb-4">
             <button
               type="submit"

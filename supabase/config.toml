@@ -1,0 +1,5 @@
+# Supabase Local CLI Configuration
+project_id = "budget-tracker-2026"
+
+[auth]
+enable_signup = false

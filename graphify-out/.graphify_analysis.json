@@ -1,0 +1,285 @@
+{
+  "communities": {
+    "0": [
+      "eslint",
+      "eslint_config_next",
+      "package_devdependencies",
+      "package_devdependencies_eslint",
+      "package_devdependencies_eslint_config_next",
+      "package_devdependencies_supabase",
+      "package_devdependencies_tailwindcss",
+      "package_devdependencies_tailwindcss_postcss",
+      "package_devdependencies_types_node",
+      "package_devdependencies_types_react",
+      "package_devdependencies_types_react_dom",
+      "package_devdependencies_typescript",
+      "package_devdependencies_vitest",
+      "supabase",
+      "tailwindcss",
+      "tailwindcss_postcss",
+      "types_node",
+      "types_react",
+      "types_react_dom",
+      "typescript",
+      "vitest"
+    ],
+    "1": [
+      "clsx",
+      "lucide_react",
+      "next",
+      "package_dependencies",
+      "package_dependencies_clsx",
+      "package_dependencies_lucide_react",
+      "package_dependencies_next",
+      "package_dependencies_react",
+      "package_dependencies_react_dom",
+      "package_dependencies_supabase_ssr",
+      "package_dependencies_supabase_supabase_js",
+      "package_dependencies_tailwind_merge",
+      "package_dependencies_zod",
+      "react",
+      "react_dom",
+      "supabase_ssr",
+      "supabase_supabase_js",
+      "tailwind_merge",
+      "zod"
+    ],
+    "2": [
+      "ref_dom",
+      "ref_dom_iterable",
+      "ref_esnext",
+      "tsconfig_compileroptions",
+      "tsconfig_compileroptions_allowjs",
+      "tsconfig_compileroptions_esmoduleinterop",
+      "tsconfig_compileroptions_incremental",
+      "tsconfig_compileroptions_isolatedmodules",
+      "tsconfig_compileroptions_jsx",
+      "tsconfig_compileroptions_lib",
+      "tsconfig_compileroptions_module",
+      "tsconfig_compileroptions_moduleresolution",
+      "tsconfig_compileroptions_noemit",
+      "tsconfig_compileroptions_paths",
+      "tsconfig_compileroptions_plugins",
+      "tsconfig_compileroptions_resolvejsonmodule",
+      "tsconfig_compileroptions_skiplibcheck",
+      "tsconfig_compileroptions_strict",
+      "tsconfig_compileroptions_target"
+    ],
+    "3": [
+      "package",
+      "package_name",
+      "package_private",
+      "package_scripts",
+      "package_scripts_build",
+      "package_scripts_dev",
+      "package_scripts_lint",
+      "package_scripts_start",
+      "package_scripts_test",
+      "package_scripts_test_rls",
+      "package_scripts_typecheck",
+      "package_scripts_update_types",
+      "package_type",
+      "package_version"
+    ],
+    "4": [
+      "src_app_login_page",
+      "src_app_login_page_loginpage",
+      "src_app_protected_settings_page",
+      "src_app_protected_settings_page_settingspage",
+      "src_lib_supabase_client",
+      "src_lib_supabase_client_createclient",
+      "src_lib_supabase_server",
+      "src_types_database_types",
+      "src_types_database_types_database",
+      "src_types_database_types_expensebucket",
+      "src_types_database_types_json",
+      "src_types_database_types_savingbucket",
+      "src_types_database_types_transactionbucket",
+      "src_types_database_types_transactionkind"
+    ],
+    "5": [
+      "src_app_protected_layout",
+      "src_app_protected_layout_protectedlayout",
+      "src_components_layout_appshell",
+      "src_components_layout_appshell_appshell",
+      "src_components_layout_desktopsidebar",
+      "src_components_layout_desktopsidebar_desktopsidebar",
+      "src_components_layout_mobilenav",
+      "src_components_layout_mobilenav_mobilenav",
+      "src_components_ui_addtransactionbutton",
+      "src_components_ui_addtransactionbutton_addtransactionbutton",
+      "src_lib_onboarding",
+      "src_lib_onboarding_ensureonboardeduser",
+      "src_lib_supabase_server_createclient"
+    ],
+    "6": [
+      "ref_next_dev_types_ts",
+      "ref_next_env_d_ts",
+      "ref_next_types_ts",
+      "ref_node_modules",
+      "ref_ts",
+      "ref_tsx",
+      "tsconfig",
+      "tsconfig_exclude",
+      "tsconfig_include"
+    ],
+    "7": [
+      "src_lib_calculations",
+      "src_lib_calculations_budgettargetsinput",
+      "src_lib_calculations_calculatesummaries",
+      "src_lib_calculations_formatpoishatodecimal",
+      "src_lib_calculations_parsedecimaltopoisha",
+      "src_lib_calculations_summaryresult",
+      "src_lib_calculations_test",
+      "src_lib_calculations_transactioninput"
+    ],
+    "8": [
+      "proxy",
+      "proxy_config",
+      "proxy_proxy",
+      "src_lib_supabase_proxy",
+      "src_lib_supabase_proxy_updatesession"
+    ],
+    "9": [
+      "src_app_layout",
+      "src_app_layout_metadata",
+      "src_app_layout_rootlayout"
+    ],
+    "10": [
+      "next_env_d",
+      "next_env_d_rationale_5"
+    ],
+    "11": [
+      "src_app_page",
+      "src_app_page_homepage"
+    ],
+    "12": [
+      "src_app_protected_dashboard_page",
+      "src_app_protected_dashboard_page_dashboardpage"
+    ],
+    "13": [
+      "src_app_protected_review_yearly_page",
+      "src_app_protected_review_yearly_page_yearlyreviewpage"
+    ],
+    "14": [
+      "src_app_protected_transactions_page",
+      "src_app_protected_transactions_page_transactionspage"
+    ],
+    "15": [
+      "eslint_config"
+    ],
+    "16": [
+      "scripts_test_rls"
+    ]
+  },
+  "cohesion": {
+    "0": 0.09523809523809523,
+    "1": 0.10526315789473684,
+    "2": 0.10526315789473684,
+    "3": 0.14285714285714285,
+    "4": 0.18681318681318682,
+    "5": 0.2692307692307692,
+    "6": 0.2222222222222222,
+    "7": 0.39285714285714285,
+    "8": 0.6,
+    "9": 0.6666666666666666,
+    "10": 1.0,
+    "11": 1.0,
+    "12": 1.0,
+    "13": 1.0,
+    "14": 1.0,
+    "15": 1.0,
+    "16": 1.0
+  },
+  "gods": [
+    {
+      "id": "tsconfig_compileroptions",
+      "label": "compilerOptions",
+      "degree": 16
+    },
+    {
+      "id": "package_scripts",
+      "label": "scripts",
+      "degree": 9
+    },
+    {
+      "id": "tsconfig_include",
+      "label": "include",
+      "degree": 6
+    },
+    {
+      "id": "src_lib_onboarding_ensureonboardeduser",
+      "label": "ensureOnboardedUser()",
+      "degree": 4
+    },
+    {
+      "id": "tsconfig_compileroptions_lib",
+      "label": "lib",
+      "degree": 4
+    },
+    {
+      "id": "src_components_ui_addtransactionbutton_addtransactionbutton",
+      "label": "AddTransactionButton()",
+      "degree": 3
+    },
+    {
+      "id": "src_lib_supabase_client_createclient",
+      "label": "createClient()",
+      "degree": 3
+    },
+    {
+      "id": "src_lib_supabase_proxy_updatesession",
+      "label": "updateSession()",
+      "degree": 3
+    },
+    {
+      "id": "src_lib_supabase_server_createclient",
+      "label": "createClient()",
+      "degree": 3
+    },
+    {
+      "id": "src_types_database_types_database",
+      "label": "Database",
+      "degree": 3
+    }
+  ],
+  "surprises": [
+    {
+      "source": "proxy()",
+      "target": "updateSession()",
+      "source_files": [
+        "proxy.ts",
+        "src/lib/supabase/proxy.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "connects across different repos/directories"
+    },
+    {
+      "source": "ProtectedLayout()",
+      "target": "ensureOnboardedUser()",
+      "source_files": [
+        "src/app/(protected)/layout.tsx",
+        "src/lib/onboarding.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "cross-file semantic connection"
+    },
+    {
+      "source": "ensureOnboardedUser()",
+      "target": "createClient()",
+      "source_files": [
+        "src/lib/onboarding.ts",
+        "src/lib/supabase/server.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "cross-file semantic connection"
+    }
+  ],
+  "tokens": {
+    "input": 0,
+    "output": 0
+  }
+}

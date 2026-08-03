@@ -1,0 +1,132 @@
+{
+  "eslint.config.mjs": {
+    "mtime": 1785758390.806367,
+    "ast_hash": "8c3e769ce3a1864585299587e8785599",
+    "semantic_hash": "8c3e769ce3a1864585299587e8785599"
+  },
+  "next-env.d.ts": {
+    "mtime": 1785758403.6611214,
+    "ast_hash": "2a74d3909800ca5467fa83b0ab4a4890",
+    "semantic_hash": "2a74d3909800ca5467fa83b0ab4a4890"
+  },
+  "package.json": {
+    "mtime": 1785758369.415262,
+    "ast_hash": "bfc8b920907409330a2aac6fcdc71d5a",
+    "semantic_hash": "bfc8b920907409330a2aac6fcdc71d5a"
+  },
+  "proxy.ts": {
+    "mtime": 1785757690.5901637,
+    "ast_hash": "a3c7826cf9626cafd9fe3c9d05fd0d21",
+    "semantic_hash": "a3c7826cf9626cafd9fe3c9d05fd0d21"
+  },
+  "scripts/test-rls.js": {
+    "mtime": 1785758386.293447,
+    "ast_hash": "7a618e0d4bcdba211d6af1860d85e6a6",
+    "semantic_hash": "7a618e0d4bcdba211d6af1860d85e6a6"
+  },
+  "src/app/(protected)/dashboard/page.tsx": {
+    "mtime": 1785757722.8034987,
+    "ast_hash": "7b3ca9d74d54693a138cf4ad8d239d6c",
+    "semantic_hash": "7b3ca9d74d54693a138cf4ad8d239d6c"
+  },
+  "src/app/(protected)/layout.tsx": {
+    "mtime": 1785758413.3600476,
+    "ast_hash": "cf83a0a86046a72ea30645ad134b7c24",
+    "semantic_hash": "cf83a0a86046a72ea30645ad134b7c24"
+  },
+  "src/app/(protected)/review/yearly/page.tsx": {
+    "mtime": 1785757727.0877678,
+    "ast_hash": "a95676c5db28155e7e9df5e88180c507",
+    "semantic_hash": "a95676c5db28155e7e9df5e88180c507"
+  },
+  "src/app/(protected)/settings/page.tsx": {
+    "mtime": 1785757729.810904,
+    "ast_hash": "a8091c39cfa074693b7233012c8b6b94",
+    "semantic_hash": "a8091c39cfa074693b7233012c8b6b94"
+  },
+  "src/app/(protected)/transactions/page.tsx": {
+    "mtime": 1785757724.9668612,
+    "ast_hash": "848953e83298fe92491fb661dbc4ac49",
+    "semantic_hash": "848953e83298fe92491fb661dbc4ac49"
+  },
+  "src/app/layout.tsx": {
+    "mtime": 1785757700.0368886,
+    "ast_hash": "147dd441d990bc632024597e9f9db60f",
+    "semantic_hash": "147dd441d990bc632024597e9f9db60f"
+  },
+  "src/app/login/page.tsx": {
+    "mtime": 1785757706.4430194,
+    "ast_hash": "7ae3ab83be6eb2ec81a604d3302bd681",
+    "semantic_hash": "7ae3ab83be6eb2ec81a604d3302bd681"
+  },
+  "src/app/page.tsx": {
+    "mtime": 1785757702.7376244,
+    "ast_hash": "706e0e5ceb148ab67fd740bf6d49818b",
+    "semantic_hash": "706e0e5ceb148ab67fd740bf6d49818b"
+  },
+  "src/components/layout/AppShell.tsx": {
+    "mtime": 1785757717.3301208,
+    "ast_hash": "7228a4c38024e700f209c835fb9d3987",
+    "semantic_hash": "7228a4c38024e700f209c835fb9d3987"
+  },
+  "src/components/layout/DesktopSidebar.tsx": {
+    "mtime": 1785757714.4920044,
+    "ast_hash": "65f88433a40c3cc50c99ad96a27f6903",
+    "semantic_hash": "65f88433a40c3cc50c99ad96a27f6903"
+  },
+  "src/components/layout/MobileNav.tsx": {
+    "mtime": 1785757711.8923929,
+    "ast_hash": "7db6e471beb17c6c4a8440bdfab993e0",
+    "semantic_hash": "7db6e471beb17c6c4a8440bdfab993e0"
+  },
+  "src/components/ui/AddTransactionButton.tsx": {
+    "mtime": 1785757709.191467,
+    "ast_hash": "2a9a0df1a87cb2557670350fba05acb5",
+    "semantic_hash": "2a9a0df1a87cb2557670350fba05acb5"
+  },
+  "src/lib/calculations.test.ts": {
+    "mtime": 1785757680.8080404,
+    "ast_hash": "33d6f7545d24ba37cecbe62cba6a8f60",
+    "semantic_hash": "33d6f7545d24ba37cecbe62cba6a8f60"
+  },
+  "src/lib/calculations.ts": {
+    "mtime": 1785757675.8469846,
+    "ast_hash": "efbae05e5137d22b6f9e08897716e6da",
+    "semantic_hash": "efbae05e5137d22b6f9e08897716e6da"
+  },
+  "src/lib/onboarding.ts": {
+    "mtime": 1785758349.9309585,
+    "ast_hash": "37008b763deb8b09f30c6b802936ee3b",
+    "semantic_hash": "37008b763deb8b09f30c6b802936ee3b"
+  },
+  "src/lib/supabase/client.ts": {
+    "mtime": 1785757684.5734985,
+    "ast_hash": "402c755e9820486b741a072d741be254",
+    "semantic_hash": "402c755e9820486b741a072d741be254"
+  },
+  "src/lib/supabase/proxy.ts": {
+    "mtime": 1785758346.7108915,
+    "ast_hash": "5b0afd9885ba823995942e337273395b",
+    "semantic_hash": "5b0afd9885ba823995942e337273395b"
+  },
+  "src/lib/supabase/server.ts": {
+    "mtime": 1785757686.4278362,
+    "ast_hash": "8d568a0c7ee5539f71680fb94a09000c",
+    "semantic_hash": "8d568a0c7ee5539f71680fb94a09000c"
+  },
+  "src/types/database.types.ts": {
+    "mtime": 1785757670.9126813,
+    "ast_hash": "59eddd326fbe7daccb5134350f55c195",
+    "semantic_hash": "59eddd326fbe7daccb5134350f55c195"
+  },
+  "supabase/migrations/20260803000000_foundation_schema.sql": {
+    "mtime": 1785757667.6739001,
+    "ast_hash": "0e5efb877ad91c4d69a7c4fd77db70f0",
+    "semantic_hash": "0e5efb877ad91c4d69a7c4fd77db70f0"
+  },
+  "tsconfig.json": {
+    "mtime": 1785758403.6599367,
+    "ast_hash": "a80e217419a3d09938685afecdc2deb8",
+    "semantic_hash": "a80e217419a3d09938685afecdc2deb8"
+  }
+}

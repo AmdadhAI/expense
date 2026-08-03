@@ -5,6 +5,7 @@ import { X, Plus, Check, ChevronDown, Tag } from 'lucide-react';
 import { TransactionKind, TransactionBucket } from '@/types/database.types';
 import { parseDecimalToPoisha } from '@/lib/money';
 import { createCategory } from '@/lib/services/categories';
+import { enqueueOfflineTransaction } from '@/lib/services/offline-queue';
 
 export interface CategoryOption {
   id: string;
@@ -164,6 +165,22 @@ export function TransactionFormModal({
 
     setIsSubmitting(true);
 
+    // If device is explicitly offline when creating a transaction, queue immediately
+    if (typeof window !== 'undefined' && !navigator.onLine && !initialData?.id) {
+      enqueueOfflineTransaction({
+        request_id: requestId,
+        kind,
+        amount_decimal: amount,
+        description,
+        transaction_date: transactionDate,
+        category_id: categoryId,
+        note: note || null,
+      });
+      onSuccess();
+      onClose();
+      return;
+    }
+
     try {
       if (initialData?.id && updateAction) {
         await updateAction({
@@ -188,7 +205,24 @@ export function TransactionFormModal({
       onSuccess();
       onClose();
     } catch (err: unknown) {
-      setErrorMsg((err as Error).message || 'Failed to save transaction');
+      const msg = (err as Error).message || '';
+      // Fallback offline queue on network error
+      if (!initialData?.id && (typeof window !== 'undefined' && !navigator.onLine || msg.includes('Failed to fetch') || msg.includes('NetworkError'))) {
+        enqueueOfflineTransaction({
+          request_id: requestId,
+          kind,
+          amount_decimal: amount,
+          description,
+          transaction_date: transactionDate,
+          category_id: categoryId,
+          note: note || null,
+        });
+        onSuccess();
+        onClose();
+        return;
+      }
+
+      setErrorMsg(msg || 'Failed to save transaction');
       setIsSubmitting(false);
     }
   }

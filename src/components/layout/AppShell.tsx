@@ -7,6 +7,7 @@ import { MobileNav } from './MobileNav';
 import { TransactionFormModal, CategoryOption } from '@/components/transactions/TransactionFormModal';
 import { listCategories } from '@/lib/services/categories';
 import { createTransaction, updateTransaction } from '@/lib/services/transactions';
+import { OfflineSyncProvider } from '@/components/pwa/OfflineSyncProvider';
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -36,21 +37,23 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-slate-950 text-slate-100 selection:bg-emerald-500/20 selection:text-emerald-400">
-      <DesktopSidebar onAddTransaction={() => setIsModalOpen(true)} />
-      <main className="flex-1 p-4 md:p-8 mb-24 md:mb-0 max-w-5xl mx-auto w-full">
-        {children}
-      </main>
-      <MobileNav onAddTransaction={() => setIsModalOpen(true)} />
+    <OfflineSyncProvider>
+      <div className="min-h-screen flex flex-col md:flex-row bg-slate-950 text-slate-100 selection:bg-emerald-500/20 selection:text-emerald-400">
+        <DesktopSidebar onAddTransaction={() => setIsModalOpen(true)} />
+        <main className="flex-1 p-4 md:p-8 mb-24 md:mb-0 max-w-5xl mx-auto w-full">
+          {children}
+        </main>
+        <MobileNav onAddTransaction={() => setIsModalOpen(true)} />
 
-      <TransactionFormModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        onSuccess={handleSuccess}
-        categories={categories}
-        createAction={createTransaction}
-        updateAction={updateTransaction}
-      />
-    </div>
+        <TransactionFormModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          onSuccess={handleSuccess}
+          categories={categories}
+          createAction={createTransaction}
+          updateAction={updateTransaction}
+        />
+      </div>
+    </OfflineSyncProvider>
   );
 }

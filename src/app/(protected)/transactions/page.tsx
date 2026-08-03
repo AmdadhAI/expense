@@ -19,7 +19,6 @@ export default function TransactionsPage() {
 
   const [items, setItems] = useState<TransactionDTO[]>([]);
   const [categories, setCategories] = useState<CategoryDTO[]>([]);
-  const [nextCursor, setNextCursor] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
@@ -52,7 +51,6 @@ export default function TransactionsPage() {
     })
       .then((res) => {
         setItems(res.items);
-        setNextCursor(res.next_cursor);
         setIsLoading(false);
       })
       .catch((err: unknown) => {
@@ -89,23 +87,23 @@ export default function TransactionsPage() {
     <div className="space-y-6">
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Transactions</h1>
-          <p className="text-sm text-slate-500">Filter, Edit, and Manage Dated Records</p>
+          <h1 className="text-2xl font-bold text-slate-100 tracking-tight">Transactions</h1>
+          <p className="text-sm text-slate-400">Filter, Edit, and Manage Dated Records</p>
         </div>
       </header>
 
       {/* Filter Controls Bar */}
-      <div className="p-4 rounded-2xl bg-white border border-slate-100 space-y-3 shadow-xs">
+      <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800/80 space-y-3 shadow-lg">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
           {/* Month Filter */}
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
               Month
             </label>
             <select
               value={selectedMonth}
               onChange={(e) => setSelectedMonth(Number(e.target.value))}
-              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold bg-white focus:ring-2 focus:ring-slate-900 cursor-pointer"
+              className="w-full px-3 py-2.5 rounded-xl border border-slate-800 text-xs font-semibold bg-slate-950 text-slate-200 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer"
             >
               {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
                 <option key={m} value={m}>
@@ -117,13 +115,13 @@ export default function TransactionsPage() {
 
           {/* Kind Filter */}
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
               Type
             </label>
             <select
               value={selectedKind}
               onChange={(e) => setSelectedKind(e.target.value as TransactionKind | 'all')}
-              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold bg-white focus:ring-2 focus:ring-slate-900 capitalize cursor-pointer"
+              className="w-full px-3 py-2.5 rounded-xl border border-slate-800 text-xs font-semibold bg-slate-950 text-slate-200 focus:ring-2 focus:ring-emerald-500/20 capitalize cursor-pointer"
             >
               <option value="all">All Types</option>
               <option value="expense">Expense</option>
@@ -134,13 +132,13 @@ export default function TransactionsPage() {
 
           {/* Category Filter */}
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
               Category
             </label>
             <select
               value={selectedCategoryId}
               onChange={(e) => setSelectedCategoryId(e.target.value)}
-              className="w-full px-3 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold bg-white focus:ring-2 focus:ring-slate-900 cursor-pointer"
+              className="w-full px-3 py-2.5 rounded-xl border border-slate-800 text-xs font-semibold bg-slate-950 text-slate-200 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer"
             >
               <option value="">All Categories</option>
               {categories.map((c) => (
@@ -151,19 +149,19 @@ export default function TransactionsPage() {
             </select>
           </div>
 
-          {/* Search Query with fixed padding */}
+          {/* Search Query */}
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
               Search
             </label>
             <div className="relative flex items-center">
-              <Search className="w-4 h-4 absolute left-3 text-slate-400 pointer-events-none" />
+              <Search className="w-4 h-4 absolute left-3 text-slate-500 pointer-events-none" />
               <input
                 type="text"
                 placeholder="Description..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full !pl-9 pr-3 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold focus:ring-2 focus:ring-slate-900 bg-white"
+                className="w-full !pl-9 pr-3 py-2.5 rounded-xl border border-slate-800 text-xs font-semibold focus:ring-2 focus:ring-emerald-500/20 bg-slate-950 text-slate-100 placeholder:text-slate-500"
               />
             </div>
           </div>
@@ -173,7 +171,7 @@ export default function TransactionsPage() {
           <div className="pt-2 flex justify-end">
             <button
               onClick={clearFilters}
-              className="text-xs font-bold text-rose-600 hover:text-rose-700 inline-flex items-center gap-1 cursor-pointer"
+              className="text-xs font-bold text-rose-400 hover:text-rose-300 inline-flex items-center gap-1 cursor-pointer"
             >
               <X className="w-3.5 h-3.5" /> Clear Filters
             </button>
@@ -182,57 +180,57 @@ export default function TransactionsPage() {
       </div>
 
       {/* Transaction List */}
-      <div className="p-4 sm:p-6 rounded-2xl bg-white border border-slate-100 space-y-4 shadow-xs">
-        <div className="flex items-center justify-between border-b border-slate-100 pb-3">
-          <h2 className="text-xs sm:text-sm font-bold text-slate-900 uppercase tracking-wider">
+      <div className="p-4 sm:p-6 rounded-2xl bg-slate-900/90 border border-slate-800/80 space-y-4 shadow-lg">
+        <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
+          <h2 className="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider">
             Filtered Records ({items.length})
           </h2>
         </div>
 
         {isLoading ? (
           <div className="py-12 text-center space-y-3">
-            <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-slate-900 border-t-transparent"></div>
-            <p className="text-xs text-slate-400">Loading transactions...</p>
+            <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-emerald-500 border-t-transparent"></div>
+            <p className="text-xs text-slate-500">Loading transactions...</p>
           </div>
         ) : errorMsg ? (
-          <div className="p-4 rounded-xl bg-rose-50 text-rose-600 text-xs text-center font-medium">
+          <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 text-xs text-center font-medium">
             {errorMsg}
           </div>
         ) : items.length === 0 ? (
           <div className="py-12 text-center space-y-2">
-            <p className="text-sm font-medium text-slate-600">No matching transactions found.</p>
-            <p className="text-xs text-slate-400">Try adjusting your filter parameters.</p>
+            <p className="text-sm font-medium text-slate-400">No matching transactions found.</p>
+            <p className="text-xs text-slate-500">Try adjusting your filter parameters.</p>
           </div>
         ) : (
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-slate-800/60">
             {items.map((item) => (
               <div key={item.id} className="py-3 flex items-center justify-between gap-3">
                 <div className="space-y-0.5">
                   <div className="flex items-center gap-2 flex-wrap">
-                    <span className="font-bold text-slate-900 text-xs sm:text-sm">{item.description}</span>
+                    <span className="font-bold text-slate-200 text-xs sm:text-sm">{item.description}</span>
                     <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider ${
                       item.kind === 'income'
-                        ? 'bg-blue-50 text-blue-600'
+                        ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
                         : item.kind === 'saving'
-                        ? 'bg-emerald-50 text-emerald-600'
-                        : 'bg-rose-50 text-rose-600'
+                        ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
+                        : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
                     }`}>
                       {item.kind} {item.bucket ? `· ${item.bucket}` : ''}
                     </span>
                   </div>
-                  <p className="text-[10px] sm:text-xs text-slate-400">
+                  <p className="text-[10px] sm:text-xs text-slate-500">
                     {categoryMap.get(item.category_id) || 'Category'} · {item.transaction_date}
                   </p>
-                  {item.note && <p className="text-xs text-slate-500 italic">"{item.note}"</p>}
+                  {item.note && <p className="text-xs text-slate-400 italic">"{item.note}"</p>}
                 </div>
 
                 <div className="flex items-center gap-3 shrink-0">
                   <span className={`font-bold text-xs sm:text-sm ${
                     item.kind === 'income'
-                      ? 'text-blue-600'
+                      ? 'text-blue-400'
                       : item.kind === 'saving'
-                      ? 'text-emerald-600'
-                      : 'text-rose-600'
+                      ? 'text-emerald-400'
+                      : 'text-rose-400'
                   }`}>
                     {item.kind === 'income' ? '+' : '-'} ৳ {Number(item.amount_decimal).toLocaleString('en-BD', { minimumFractionDigits: 2 })}
                   </span>
@@ -243,14 +241,14 @@ export default function TransactionsPage() {
                         setEditingTx(item);
                         setIsModalOpen(true);
                       }}
-                      className="p-2 rounded-lg text-slate-400 hover:text-slate-800 hover:bg-slate-100 transition-colors cursor-pointer"
+                      className="p-2 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors cursor-pointer"
                       title="Edit"
                     >
                       <Pencil className="w-4 h-4" />
                     </button>
                     <button
                       onClick={() => setDeletingId(item.id)}
-                      className="p-2 rounded-lg text-slate-400 hover:text-rose-600 hover:bg-rose-50 transition-colors cursor-pointer"
+                      className="p-2 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
                       title="Delete"
                     >
                       <Trash2 className="w-4 h-4" />
@@ -288,22 +286,22 @@ export default function TransactionsPage() {
 
       {/* Delete Confirmation Modal */}
       {deletingId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 p-4 backdrop-blur-xs">
-          <div className="bg-white rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-xl border border-slate-100">
-            <h3 className="text-base font-bold text-slate-900">Delete Transaction?</h3>
-            <p className="text-xs text-slate-500">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
+          <div className="bg-slate-900 rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl border border-slate-800">
+            <h3 className="text-base font-bold text-slate-100">Delete Transaction?</h3>
+            <p className="text-xs text-slate-400">
               Are you sure you want to delete this transaction record? This action cannot be undone.
             </p>
             <div className="flex justify-end gap-2 pt-2">
               <button
                 onClick={() => setDeletingId(null)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:bg-slate-100 cursor-pointer"
+                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:bg-slate-800 cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 onClick={() => handleDelete(deletingId)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold bg-rose-600 text-white hover:bg-rose-700 cursor-pointer"
+                className="px-4 py-2 rounded-xl text-xs font-semibold bg-rose-600 text-white hover:bg-rose-500 cursor-pointer"
               >
                 Confirm Delete
               </button>

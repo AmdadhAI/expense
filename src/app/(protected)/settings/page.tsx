@@ -226,29 +226,29 @@ export default function SettingsPage() {
   return (
     <div className="space-y-6 max-w-4xl">
       <header>
-        <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Settings</h1>
-        <p className="text-sm text-slate-500">Preferences, Security, Categories & Target Allocations</p>
+        <h1 className="text-2xl font-bold text-slate-100 tracking-tight">Settings</h1>
+        <p className="text-sm text-slate-400">Preferences, Security, Categories & Target Allocations</p>
       </header>
 
       {/* Security & Account Credentials */}
-      <form onSubmit={handleUpdateCredentials} className="p-6 rounded-2xl bg-white border border-slate-100 space-y-4 shadow-xs">
+      <form onSubmit={handleUpdateCredentials} className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800/80 space-y-4 shadow-lg">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <ShieldCheck className="w-5 h-5 text-slate-900" />
-            <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Account Credentials</h2>
+            <ShieldCheck className="w-5 h-5 text-emerald-400" />
+            <h2 className="text-sm font-bold text-slate-100 uppercase tracking-wider">Account Credentials</h2>
           </div>
           <span className="text-xs text-slate-400 font-medium">Supabase Auth</span>
         </div>
 
         {authSuccessMsg && (
-          <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-100 text-xs font-medium text-emerald-700 flex items-center gap-2">
+          <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-medium text-emerald-400 flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4" />
             {authSuccessMsg}
           </div>
         )}
 
         {authErrorMsg && (
-          <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-100 text-xs font-medium text-rose-600 flex items-center gap-2">
+          <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs font-medium text-rose-400 flex items-center gap-2">
             <AlertCircle className="w-4 h-4" />
             {authErrorMsg}
           </div>
@@ -256,7 +256,7 @@ export default function SettingsPage() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="auth-email" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+            <label htmlFor="auth-email" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
               Sign-in Email
             </label>
             <input
@@ -265,12 +265,12 @@ export default function SettingsPage() {
               required
               value={newEmail}
               onChange={(e) => setNewEmail(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-slate-900 bg-white"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-800 text-xs font-semibold text-slate-100 focus:ring-2 focus:ring-emerald-500/20 bg-slate-950"
             />
           </div>
 
           <div>
-            <label htmlFor="auth-password" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+            <label htmlFor="auth-password" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
               New Password (Optional)
             </label>
             <input
@@ -279,7 +279,7 @@ export default function SettingsPage() {
               placeholder="Min 6 characters..."
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-xs font-semibold text-slate-900 focus:ring-2 focus:ring-slate-900 bg-white"
+              className="w-full px-3.5 py-2.5 rounded-xl border border-slate-800 text-xs font-semibold text-slate-100 focus:ring-2 focus:ring-emerald-500/20 bg-slate-950 placeholder:text-slate-500"
             />
           </div>
         </div>
@@ -288,7 +288,7 @@ export default function SettingsPage() {
           <button
             type="submit"
             disabled={isUpdatingAuth}
-            className="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition-colors disabled:opacity-50 inline-flex items-center gap-2 cursor-pointer"
+            className="px-5 py-2.5 rounded-xl bg-emerald-600 text-slate-950 font-bold text-xs hover:bg-emerald-500 transition-all disabled:opacity-50 inline-flex items-center gap-2 cursor-pointer shadow-sm"
           >
             <KeyRound className="w-4 h-4" />
             {isUpdatingAuth ? 'Updating...' : 'Update Credentials'}
@@ -297,36 +297,36 @@ export default function SettingsPage() {
       </form>
 
       {/* Application Defaults */}
-      <div className="p-6 rounded-2xl bg-white border border-slate-100 space-y-4 shadow-xs">
-        <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Application Environment</h2>
+      <div className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800/80 space-y-4 shadow-lg">
+        <h2 className="text-sm font-bold text-slate-100 uppercase tracking-wider">Application Environment</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
-          <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+          <div className="p-3.5 bg-slate-950 rounded-xl border border-slate-800/80">
             <span className="text-slate-400 font-medium">Currency</span>
-            <p className="font-bold text-slate-900 text-sm mt-0.5">BDT (৳)</p>
+            <p className="font-bold text-slate-100 text-sm mt-0.5">BDT (৳)</p>
           </div>
-          <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-100">
+          <div className="p-3.5 bg-slate-950 rounded-xl border border-slate-800/80">
             <span className="text-slate-400 font-medium">Timezone</span>
-            <p className="font-bold text-slate-900 text-sm mt-0.5">Asia/Dhaka</p>
+            <p className="font-bold text-slate-100 text-sm mt-0.5">Asia/Dhaka</p>
           </div>
         </div>
       </div>
 
       {/* Editable Allocation Targets */}
-      <form onSubmit={handleSaveTargets} className="p-6 rounded-2xl bg-white border border-slate-100 space-y-5 shadow-xs">
+      <form onSubmit={handleSaveTargets} className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800/80 space-y-5 shadow-lg">
         <div className="flex items-center justify-between">
-          <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">2026 Target Allocations</h2>
+          <h2 className="text-sm font-bold text-slate-100 uppercase tracking-wider">2026 Target Allocations</h2>
           <span className="text-xs text-slate-400 font-medium">Must total 100%</span>
         </div>
 
         {successMsg && (
-          <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-100 text-xs font-medium text-emerald-700 flex items-center gap-2">
+          <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-medium text-emerald-400 flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4" />
             {successMsg}
           </div>
         )}
 
         {errorMsg && (
-          <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-100 text-xs font-medium text-rose-600 flex items-center gap-2">
+          <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs font-medium text-rose-400 flex items-center gap-2">
             <AlertCircle className="w-4 h-4" />
             {errorMsg}
           </div>
@@ -337,7 +337,7 @@ export default function SettingsPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
-              <label htmlFor="needs" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+              <label htmlFor="needs" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
                 Needs (%)
               </label>
               <input
@@ -348,12 +348,12 @@ export default function SettingsPage() {
                 required
                 value={needsPercent}
                 onChange={(e) => setNeedsPercent(Number(e.target.value))}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-slate-900"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-800 text-sm font-bold text-slate-100 focus:ring-2 focus:ring-emerald-500/20 bg-slate-950"
               />
             </div>
 
             <div>
-              <label htmlFor="wants" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+              <label htmlFor="wants" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
                 Wants (%)
               </label>
               <input
@@ -364,12 +364,12 @@ export default function SettingsPage() {
                 required
                 value={wantsPercent}
                 onChange={(e) => setWantsPercent(Number(e.target.value))}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-slate-900"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-800 text-sm font-bold text-slate-100 focus:ring-2 focus:ring-emerald-500/20 bg-slate-950"
               />
             </div>
 
             <div>
-              <label htmlFor="savings" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+              <label htmlFor="savings" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
                 Savings (%)
               </label>
               <input
@@ -380,15 +380,15 @@ export default function SettingsPage() {
                 required
                 value={savingsPercent}
                 onChange={(e) => setSavingsPercent(Number(e.target.value))}
-                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 text-sm font-bold text-slate-900 focus:ring-2 focus:ring-slate-900"
+                className="w-full px-3.5 py-2.5 rounded-xl border border-slate-800 text-sm font-bold text-slate-100 focus:ring-2 focus:ring-emerald-500/20 bg-slate-950"
               />
             </div>
           </div>
         )}
 
-        <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+        <div className="flex items-center justify-between pt-2 border-t border-slate-800/80">
           <span className={`text-xs font-bold ${
-            needsPercent + wantsPercent + savingsPercent === 100 ? 'text-emerald-600' : 'text-rose-600'
+            needsPercent + wantsPercent + savingsPercent === 100 ? 'text-emerald-400' : 'text-rose-400'
           }`}>
             Total: {needsPercent + wantsPercent + savingsPercent}%
           </span>
@@ -396,7 +396,7 @@ export default function SettingsPage() {
           <button
             type="submit"
             disabled={isSaving || isLoading}
-            className="px-5 py-2.5 rounded-xl bg-slate-900 text-white font-bold text-xs hover:bg-slate-800 transition-colors disabled:opacity-50 inline-flex items-center gap-2 cursor-pointer"
+            className="px-5 py-2.5 rounded-xl bg-emerald-600 text-slate-950 font-bold text-xs hover:bg-emerald-500 transition-all disabled:opacity-50 inline-flex items-center gap-2 cursor-pointer shadow-sm"
           >
             <Save className="w-4 h-4" />
             {isSaving ? 'Saving...' : 'Save Targets'}
@@ -405,32 +405,32 @@ export default function SettingsPage() {
       </form>
 
       {/* Category Management Section */}
-      <div className="p-6 rounded-2xl bg-white border border-slate-100 space-y-5 shadow-xs">
+      <div className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800/80 space-y-5 shadow-lg">
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Category Management</h2>
+            <h2 className="text-sm font-bold text-slate-100 uppercase tracking-wider">Category Management</h2>
             <p className="text-xs text-slate-400">Add, rename, or archive transaction categories</p>
           </div>
 
           <button
             type="button"
             onClick={() => setIsCreatingCat(!isCreatingCat)}
-            className="px-4 py-2 bg-slate-900 text-white rounded-xl text-xs font-bold hover:bg-slate-800 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
+            className="px-4 py-2 bg-emerald-600 text-slate-950 rounded-xl text-xs font-bold hover:bg-emerald-500 transition-colors inline-flex items-center gap-1.5 cursor-pointer shadow-sm"
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-4 h-4 stroke-[3]" />
             {isCreatingCat ? 'Cancel' : 'Add Category'}
           </button>
         </div>
 
         {catSuccessMsg && (
-          <div className="p-3.5 rounded-xl bg-emerald-50 border border-emerald-100 text-xs font-medium text-emerald-700 flex items-center gap-2">
+          <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-xs font-medium text-emerald-400 flex items-center gap-2">
             <CheckCircle2 className="w-4 h-4" />
             {catSuccessMsg}
           </div>
         )}
 
         {catErrorMsg && (
-          <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-100 text-xs font-medium text-rose-600 flex items-center gap-2">
+          <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs font-medium text-rose-400 flex items-center gap-2">
             <AlertCircle className="w-4 h-4" />
             {catErrorMsg}
           </div>
@@ -438,27 +438,27 @@ export default function SettingsPage() {
 
         {/* Add Category Form */}
         {isCreatingCat && (
-          <form onSubmit={handleCreateCategory} className="p-4 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
-            <h3 className="text-xs font-bold text-slate-900">Create New Category</h3>
+          <form onSubmit={handleCreateCategory} className="p-4 bg-slate-950 rounded-xl border border-slate-800 space-y-3">
+            <h3 className="text-xs font-bold text-slate-100">Create New Category</h3>
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
-                <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Name</label>
+                <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Name</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Dining"
                   value={newCatName}
                   onChange={(e) => setNewCatName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold bg-white"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-800 text-xs font-semibold bg-slate-900 text-slate-100"
                 />
               </div>
 
               <div>
-                <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Type</label>
+                <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Type</label>
                 <select
                   value={newCatKind}
                   onChange={(e) => setNewCatKind(e.target.value as TransactionKind)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold bg-white cursor-pointer"
+                  className="w-full px-3 py-2 rounded-lg border border-slate-800 text-xs font-semibold bg-slate-900 text-slate-100 cursor-pointer"
                 >
                   <option value="expense">Expense</option>
                   <option value="saving">Saving</option>
@@ -468,11 +468,11 @@ export default function SettingsPage() {
 
               {newCatKind === 'expense' ? (
                 <div>
-                  <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Bucket</label>
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Bucket</label>
                   <select
                     value={newCatBucket}
                     onChange={(e) => setNewCatBucket(e.target.value as 'needs' | 'wants')}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold bg-white cursor-pointer"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-800 text-xs font-semibold bg-slate-900 text-slate-100 cursor-pointer"
                   >
                     <option value="needs">Needs</option>
                     <option value="wants">Wants</option>
@@ -480,12 +480,12 @@ export default function SettingsPage() {
                 </div>
               ) : (
                 <div>
-                  <label className="block text-[10px] font-semibold text-slate-500 uppercase tracking-wider mb-1">Bucket</label>
+                  <label className="block text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1">Bucket</label>
                   <input
                     type="text"
                     disabled
                     value={newCatKind === 'saving' ? 'savings' : 'None'}
-                    className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-semibold bg-slate-100 text-slate-500"
+                    className="w-full px-3 py-2 rounded-lg border border-slate-800 text-xs font-semibold bg-slate-900/50 text-slate-500"
                   />
                 </div>
               )}
@@ -494,7 +494,7 @@ export default function SettingsPage() {
             <div className="flex justify-end pt-1">
               <button
                 type="submit"
-                className="px-4 py-2 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800 transition-colors cursor-pointer"
+                className="px-4 py-2 bg-emerald-600 text-slate-950 rounded-lg text-xs font-bold hover:bg-emerald-500 transition-colors cursor-pointer"
               >
                 Create Category
               </button>
@@ -508,18 +508,18 @@ export default function SettingsPage() {
             const list = groupedCategories[kind] || [];
             return (
               <div key={kind} className="space-y-2">
-                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-500 capitalize flex items-center justify-between">
+                <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 capitalize flex items-center justify-between">
                   <span>{kind} Categories ({list.length})</span>
                 </h3>
 
                 {list.length === 0 ? (
-                  <p className="text-xs text-slate-400 italic">No active categories for {kind}.</p>
+                  <p className="text-xs text-slate-500 italic">No active categories for {kind}.</p>
                 ) : (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                     {list.map((c) => (
                       <div
                         key={c.id}
-                        className="p-3 bg-slate-50 rounded-xl border border-slate-100 flex items-center justify-between text-xs"
+                        className="p-3 bg-slate-950 rounded-xl border border-slate-800/80 flex items-center justify-between text-xs"
                       >
                         {editingCatId === c.id ? (
                           <div className="flex items-center gap-2 w-full">
@@ -527,17 +527,17 @@ export default function SettingsPage() {
                               type="text"
                               value={editingCatName}
                               onChange={(e) => setEditingCatName(e.target.value)}
-                              className="w-full px-2 py-1 text-xs font-bold rounded border border-slate-300 bg-white"
+                              className="w-full px-2 py-1 text-xs font-bold rounded border border-slate-700 bg-slate-900 text-slate-100"
                             />
                             <button
                               onClick={() => handleUpdateCategory(c.id)}
-                              className="px-2 py-1 bg-slate-900 text-white rounded font-bold hover:bg-slate-800"
+                              className="px-2 py-1 bg-emerald-600 text-slate-950 rounded font-bold hover:bg-emerald-500"
                             >
                               Save
                             </button>
                             <button
                               onClick={() => setEditingCatId(null)}
-                              className="px-2 py-1 text-slate-500 hover:text-slate-700"
+                              className="px-2 py-1 text-slate-400 hover:text-slate-200"
                             >
                               Cancel
                             </button>
@@ -545,9 +545,9 @@ export default function SettingsPage() {
                         ) : (
                           <>
                             <div className="flex items-center gap-2">
-                              <span className="font-bold text-slate-900">{c.name}</span>
+                              <span className="font-bold text-slate-200">{c.name}</span>
                               {c.default_bucket && (
-                                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-slate-200 text-slate-700">
+                                <span className="px-2 py-0.5 rounded-md text-[10px] font-bold uppercase bg-slate-800 text-slate-300">
                                   {c.default_bucket}
                                 </span>
                               )}
@@ -559,14 +559,14 @@ export default function SettingsPage() {
                                   setEditingCatId(c.id);
                                   setEditingCatName(c.name);
                                 }}
-                                className="p-1.5 text-slate-400 hover:text-slate-800 hover:bg-slate-200 rounded-md transition-colors"
+                                className="p-1.5 text-slate-400 hover:text-slate-200 hover:bg-slate-800 rounded-md transition-colors"
                                 title="Rename"
                               >
                                 <Pencil className="w-3.5 h-3.5" />
                               </button>
                               <button
                                 onClick={() => handleArchiveCategory(c.id)}
-                                className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-md transition-colors"
+                                className="p-1.5 text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 rounded-md transition-colors"
                                 title="Archive"
                               >
                                 <Archive className="w-3.5 h-3.5" />
@@ -585,15 +585,15 @@ export default function SettingsPage() {
       </div>
 
       {/* Account Session Sign Out */}
-      <div className="p-6 rounded-2xl bg-white border border-slate-100 shadow-xs flex items-center justify-between">
+      <div className="p-6 rounded-2xl bg-slate-900/90 border border-slate-800/80 shadow-lg flex items-center justify-between">
         <div>
-          <h2 className="text-sm font-bold text-slate-900 uppercase tracking-wider">Session Management</h2>
+          <h2 className="text-sm font-bold text-slate-100 uppercase tracking-wider">Session Management</h2>
           <p className="text-xs text-slate-400">Sign out of your private personal budget session</p>
         </div>
 
         <button
           onClick={handleSignOut}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-50 text-rose-600 font-bold text-xs hover:bg-rose-100 transition-colors cursor-pointer"
+          className="flex items-center gap-2 px-4 py-2.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400 font-bold text-xs hover:bg-rose-500/20 transition-colors cursor-pointer"
         >
           <LogOut className="w-4 h-4" />
           Sign Out

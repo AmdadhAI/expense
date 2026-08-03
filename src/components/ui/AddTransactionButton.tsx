@@ -12,9 +12,9 @@ export function AddTransactionButton({ onClick }: AddTransactionButtonProps) {
       onClick={onClick}
       aria-label="Add Transaction"
       title="Add Transaction"
-      className="inline-flex items-center justify-center p-3 rounded-full bg-slate-900 text-white cursor-pointer hover:bg-slate-800 transition-colors shadow-md border border-slate-900"
+      className="inline-flex items-center justify-center p-3.5 rounded-full bg-emerald-600 text-slate-950 cursor-pointer hover:bg-emerald-500 transition-all shadow-[0_0_16px_rgba(16,185,129,0.35)] border border-emerald-400/40 active:scale-95"
     >
-      <Plus className="w-5 h-5" />
+      <Plus className="w-5 h-5 stroke-[3]" />
       <span className="sr-only">Add Transaction</span>
     </button>
   );

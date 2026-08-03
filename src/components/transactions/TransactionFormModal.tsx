@@ -194,19 +194,19 @@ export function TransactionFormModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-slate-900/60 p-0 md:p-4 backdrop-blur-xs">
+    <div className="fixed inset-0 z-50 flex items-end md:items-center justify-center bg-slate-950/80 p-0 md:p-4 backdrop-blur-sm">
       <div className="fixed inset-0" onClick={onClose} aria-hidden="true" />
 
-      <div className="relative w-full max-w-lg bg-white rounded-t-3xl md:rounded-2xl shadow-2xl border border-slate-100 max-h-[92vh] flex flex-col overflow-hidden z-10 animate-in slide-in-from-bottom duration-200">
+      <div className="relative w-full max-w-lg bg-slate-900 rounded-t-3xl md:rounded-2xl shadow-2xl border border-slate-800 max-h-[92vh] flex flex-col overflow-hidden z-10 animate-in slide-in-from-bottom duration-200">
         {/* Sticky Header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-white sticky top-0 z-20">
-          <h2 className="text-lg font-bold text-slate-900">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-slate-800 bg-slate-900 sticky top-0 z-20">
+          <h2 className="text-lg font-bold text-slate-100">
             {initialData?.id ? 'Edit Transaction' : 'Record Transaction'}
           </h2>
           <button
             type="button"
             onClick={onClose}
-            className="p-2 text-slate-400 hover:text-slate-600 rounded-full hover:bg-slate-100 transition-colors"
+            className="p-2 text-slate-400 hover:text-slate-200 rounded-full hover:bg-slate-800 transition-colors cursor-pointer"
           >
             <X className="w-5 h-5" />
             <span className="sr-only">Close</span>
@@ -216,17 +216,17 @@ export function TransactionFormModal({
         {/* Scrollable Form */}
         <form onSubmit={handleSubmit} className="p-5 sm:p-6 space-y-4.5 overflow-y-auto flex-1 pb-12 sm:pb-8">
           {errorMsg && (
-            <div className="p-3.5 rounded-xl bg-rose-50 border border-rose-100 text-xs font-semibold text-rose-600">
+            <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-xs font-semibold text-rose-400">
               {errorMsg}
             </div>
           )}
 
           {/* Kind Selector */}
           <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1.5">
+            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">
               Transaction Type
             </label>
-            <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-100 rounded-xl">
+            <div className="grid grid-cols-3 gap-1.5 p-1 bg-slate-950 rounded-xl border border-slate-800">
               {(['expense', 'saving', 'income'] as TransactionKind[]).map((k) => (
                 <button
                   key={k}
@@ -237,9 +237,9 @@ export function TransactionFormModal({
                       ? k === 'income'
                         ? 'bg-blue-600 text-white shadow-sm'
                         : k === 'saving'
-                        ? 'bg-emerald-600 text-white shadow-sm'
+                        ? 'bg-emerald-600 text-slate-950 shadow-sm'
                         : 'bg-rose-600 text-white shadow-sm'
-                      : 'text-slate-600 hover:text-slate-900'
+                      : 'text-slate-400 hover:text-slate-200'
                   }`}
                 >
                   {k}
@@ -250,11 +250,11 @@ export function TransactionFormModal({
 
           {/* Amount Input with Fixed Padding */}
           <div>
-            <label htmlFor="amount" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+            <label htmlFor="amount" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
               Amount (BDT ৳)
             </label>
             <div className="relative flex items-center">
-              <span className="absolute left-3.5 text-slate-700 font-bold text-base pointer-events-none select-none">৳</span>
+              <span className="absolute left-3.5 text-emerald-400 font-bold text-base pointer-events-none select-none">৳</span>
               <input
                 id="amount"
                 type="text"
@@ -263,7 +263,7 @@ export function TransactionFormModal({
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                className="w-full !pl-10 pr-4 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 text-lg font-bold text-slate-900 bg-white"
+                className="w-full !pl-10 pr-4 py-3 rounded-xl border border-slate-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-lg font-bold text-slate-100 bg-slate-950"
               />
             </div>
           </div>
@@ -271,7 +271,7 @@ export function TransactionFormModal({
           {/* Custom Touch-Friendly Category Selector */}
           <div>
             <div className="flex items-center justify-between mb-1.5">
-              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider">
                 Category
               </label>
               <button
@@ -280,7 +280,7 @@ export function TransactionFormModal({
                   setIsCreatingCategory(!isCreatingCategory);
                   setIsCategoryPickerOpen(false);
                 }}
-                className="text-xs font-bold text-slate-900 hover:text-slate-700 inline-flex items-center gap-1 cursor-pointer"
+                className="text-xs font-bold text-emerald-400 hover:text-emerald-300 inline-flex items-center gap-1 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
                 {isCreatingCategory ? 'Cancel' : 'New Category'}
@@ -288,22 +288,22 @@ export function TransactionFormModal({
             </div>
 
             {isCreatingCategory ? (
-              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
+              <div className="p-3.5 bg-slate-950 rounded-xl border border-slate-800 space-y-3">
                 <input
                   type="text"
                   placeholder="Category Name (e.g. Dining)"
                   value={newCatName}
                   onChange={(e) => setNewCatName(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-xs font-semibold bg-white"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-800 text-xs font-semibold bg-slate-900 text-slate-100"
                 />
                 {kind === 'expense' && (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-semibold text-slate-500">Bucket:</span>
+                    <span className="text-xs font-semibold text-slate-400">Bucket:</span>
                     <button
                       type="button"
                       onClick={() => setNewCatBucket('needs')}
                       className={`px-3 py-1.5 text-xs font-bold rounded-lg cursor-pointer ${
-                        newCatBucket === 'needs' ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-700'
+                        newCatBucket === 'needs' ? 'bg-emerald-600 text-slate-950' : 'bg-slate-800 text-slate-300'
                       }`}
                     >
                       Needs
@@ -312,7 +312,7 @@ export function TransactionFormModal({
                       type="button"
                       onClick={() => setNewCatBucket('wants')}
                       className={`px-3 py-1.5 text-xs font-bold rounded-lg cursor-pointer ${
-                        newCatBucket === 'wants' ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-700'
+                        newCatBucket === 'wants' ? 'bg-emerald-600 text-slate-950' : 'bg-slate-800 text-slate-300'
                       }`}
                     >
                       Wants
@@ -322,7 +322,7 @@ export function TransactionFormModal({
                 <button
                   type="button"
                   onClick={handleAddCategory}
-                  className="w-full py-2.5 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800 cursor-pointer"
+                  className="w-full py-2.5 bg-emerald-600 text-slate-950 rounded-lg text-xs font-bold hover:bg-emerald-500 cursor-pointer"
                 >
                   Create & Select Category
                 </button>
@@ -333,11 +333,11 @@ export function TransactionFormModal({
                 <button
                   type="button"
                   onClick={() => setIsCategoryPickerOpen(!isCategoryPickerOpen)}
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white flex items-center justify-between text-left hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900 cursor-pointer shadow-2xs"
+                  className="w-full px-4 py-3 rounded-xl border border-slate-800 bg-slate-950 flex items-center justify-between text-left hover:border-slate-700 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 cursor-pointer shadow-xs"
                 >
                   <div className="flex items-center gap-2">
                     <Tag className="w-4 h-4 text-slate-400" />
-                    <span className="text-sm font-bold text-slate-900">
+                    <span className="text-sm font-bold text-slate-100">
                       {selectedCategoryObj
                         ? `${selectedCategoryObj.name} ${selectedCategoryObj.default_bucket ? `(${selectedCategoryObj.default_bucket})` : ''}`
                         : 'Select Category'}
@@ -348,9 +348,9 @@ export function TransactionFormModal({
 
                 {/* Custom Category Selection Chips */}
                 {isCategoryPickerOpen && (
-                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-2 max-h-48 overflow-y-auto">
+                  <div className="p-3 bg-slate-950 rounded-2xl border border-slate-800 space-y-2 max-h-48 overflow-y-auto">
                     {availableCategories.length === 0 ? (
-                      <p className="text-xs text-slate-400 text-center py-2">No categories available for {kind}.</p>
+                      <p className="text-xs text-slate-500 text-center py-2">No categories available for {kind}.</p>
                     ) : (
                       <div className="grid grid-cols-1 gap-1.5">
                         {availableCategories.map((c) => {
@@ -365,14 +365,14 @@ export function TransactionFormModal({
                               }}
                               className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center justify-between transition-all cursor-pointer ${
                                 isSelected
-                                  ? 'bg-slate-900 text-white shadow-xs'
-                                  : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-100'
+                                  ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/30'
+                                  : 'bg-slate-900 text-slate-300 hover:bg-slate-800 border border-slate-800/60'
                               }`}
                             >
                               <span>
                                 {c.name} {c.default_bucket ? `(${c.default_bucket})` : ''}
                               </span>
-                              {isSelected && <Check className="w-4 h-4 text-white" />}
+                              {isSelected && <Check className="w-4 h-4 text-emerald-400" />}
                             </button>
                           );
                         })}
@@ -386,7 +386,7 @@ export function TransactionFormModal({
 
           {/* Description */}
           <div>
-            <label htmlFor="description" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+            <label htmlFor="description" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
               Description
             </label>
             <input
@@ -396,13 +396,13 @@ export function TransactionFormModal({
               placeholder="e.g. Monthly Grocery"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm font-medium text-slate-900 bg-white"
+              className="w-full px-3.5 py-3 rounded-xl border border-slate-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-sm font-medium text-slate-100 bg-slate-950"
             />
           </div>
 
           {/* Date */}
           <div>
-            <label htmlFor="transaction_date" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+            <label htmlFor="transaction_date" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
               Date (Asia/Dhaka)
             </label>
             <input
@@ -411,7 +411,7 @@ export function TransactionFormModal({
               required
               value={transactionDate}
               onChange={(e) => setTransactionDate(e.target.value)}
-              className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm font-semibold text-slate-900 bg-white cursor-pointer"
+              className="w-full px-3.5 py-3 rounded-xl border border-slate-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-sm font-semibold text-slate-100 bg-slate-950 cursor-pointer"
             />
           </div>
 
@@ -421,13 +421,13 @@ export function TransactionFormModal({
               <button
                 type="button"
                 onClick={() => setShowNote(true)}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-800 py-1 cursor-pointer"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-slate-200 py-1 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" /> Add optional note
               </button>
             ) : (
               <div>
-                <label htmlFor="note" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">
+                <label htmlFor="note" className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
                   Note
                 </label>
                 <textarea
@@ -436,7 +436,7 @@ export function TransactionFormModal({
                   placeholder="Additional transaction details..."
                   value={note}
                   onChange={(e) => setNote(e.target.value)}
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm text-slate-900 bg-white"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-slate-800 focus:border-emerald-500 focus:ring-2 focus:ring-emerald-500/20 text-sm text-slate-100 bg-slate-950"
                 />
               </div>
             )}
@@ -447,13 +447,13 @@ export function TransactionFormModal({
             <button
               type="submit"
               disabled={isSubmitting}
-              className="w-full py-3.5 rounded-xl bg-slate-900 text-white font-bold text-sm hover:bg-slate-800 transition-colors disabled:opacity-50 flex items-center justify-center gap-2 shadow-md cursor-pointer active:scale-[0.99]"
+              className="w-full py-3.5 rounded-xl bg-emerald-600 text-slate-950 font-bold text-sm hover:bg-emerald-500 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-[0_0_16px_rgba(16,185,129,0.3)] cursor-pointer active:scale-[0.99]"
             >
               {isSubmitting ? (
                 'Saving...'
               ) : (
                 <>
-                  <Check className="w-4 h-4" />
+                  <Check className="w-4 h-4 stroke-[3]" />
                   {initialData?.id ? 'Update Transaction' : 'Save Transaction'}
                 </>
               )}

@@ -36,9 +36,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-slate-50">
+    <div className="min-h-screen flex flex-col md:flex-row bg-slate-950 text-slate-100 selection:bg-emerald-500/20 selection:text-emerald-400">
       <DesktopSidebar onAddTransaction={() => setIsModalOpen(true)} />
-      <main className="flex-1 p-4 md:p-8 mb-20 md:mb-0 max-w-5xl mx-auto w-full">
+      <main className="flex-1 p-4 md:p-8 mb-24 md:mb-0 max-w-5xl mx-auto w-full">
         {children}
       </main>
       <MobileNav onAddTransaction={() => setIsModalOpen(true)} />

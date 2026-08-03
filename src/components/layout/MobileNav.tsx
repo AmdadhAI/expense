@@ -22,7 +22,7 @@ export function MobileNav({ onAddTransaction }: MobileNavProps) {
   return (
     <nav
       aria-label="Mobile navigation"
-      className="md:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-slate-200/80 px-4 py-2 flex items-center justify-between z-40 pb-[calc(0.5rem+env(safe-area-inset-bottom))]"
+      className="md:hidden fixed bottom-0 left-0 right-0 bg-slate-900/95 backdrop-blur-md border-t border-slate-800/80 px-4 py-2 flex items-center justify-between z-40 pb-[calc(0.5rem+env(safe-area-inset-bottom))]"
     >
       {navItems.slice(0, 2).map((item) => {
         const Icon = item.icon;
@@ -31,11 +31,11 @@ export function MobileNav({ onAddTransaction }: MobileNavProps) {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex flex-col items-center py-1 px-3 text-[11px] font-medium transition-colors ${
-              isActive ? 'text-slate-900 font-bold' : 'text-slate-500 hover:text-slate-700'
+            className={`flex flex-col items-center py-1 px-3 text-[11px] font-semibold transition-colors ${
+              isActive ? 'text-emerald-400 font-bold' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Icon className="w-5 h-5 mb-1" />
+            <Icon className={`w-5 h-5 mb-1 ${isActive ? 'text-emerald-400' : 'text-slate-400'}`} />
             {item.label}
           </Link>
         );
@@ -52,11 +52,11 @@ export function MobileNav({ onAddTransaction }: MobileNavProps) {
           <Link
             key={item.href}
             href={item.href}
-            className={`flex flex-col items-center py-1 px-3 text-[11px] font-medium transition-colors ${
-              isActive ? 'text-slate-900 font-bold' : 'text-slate-500 hover:text-slate-700'
+            className={`flex flex-col items-center py-1 px-3 text-[11px] font-semibold transition-colors ${
+              isActive ? 'text-emerald-400 font-bold' : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            <Icon className="w-5 h-5 mb-1" />
+            <Icon className={`w-5 h-5 mb-1 ${isActive ? 'text-emerald-400' : 'text-slate-400'}`} />
             {item.label}
           </Link>
         );

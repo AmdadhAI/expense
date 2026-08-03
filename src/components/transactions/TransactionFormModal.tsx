@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { X, Plus, Check } from 'lucide-react';
+import { X, Plus, Check, ChevronDown, Tag } from 'lucide-react';
 import { TransactionKind, TransactionBucket } from '@/types/database.types';
 import { parseDecimalToPoisha } from '@/lib/money';
 import { createCategory } from '@/lib/services/categories';
@@ -66,6 +66,9 @@ export function TransactionFormModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [requestId, setRequestId] = useState<string>('');
 
+  // Custom Category selector dropdown state
+  const [isCategoryPickerOpen, setIsCategoryPickerOpen] = useState(false);
+
   // Inline Category creation state
   const [isCreatingCategory, setIsCreatingCategory] = useState(false);
   const [newCatName, setNewCatName] = useState('');
@@ -96,6 +99,7 @@ export function TransactionFormModal({
         const defaultCat = localCategories.find((c) => c.kind === 'expense');
         setCategoryId(defaultCat ? defaultCat.id : '');
       }
+      setIsCategoryPickerOpen(false);
       setIsCreatingCategory(false);
       setNewCatName('');
       setErrorMsg(null);
@@ -105,11 +109,13 @@ export function TransactionFormModal({
   }, [isOpen, initialData, localCategories]);
 
   const availableCategories = localCategories.filter((c) => c.kind === kind);
+  const selectedCategoryObj = localCategories.find((c) => c.id === categoryId);
 
   const handleKindChange = (newKind: TransactionKind) => {
     setKind(newKind);
     const firstCat = localCategories.find((c) => c.kind === newKind);
     setCategoryId(firstCat ? firstCat.id : '');
+    setIsCategoryPickerOpen(false);
     setIsCreatingCategory(false);
   };
 
@@ -131,6 +137,7 @@ export function TransactionFormModal({
       setLocalCategories((prev) => [...prev, newOpt]);
       setCategoryId(created.id);
       setIsCreatingCategory(false);
+      setIsCategoryPickerOpen(false);
       setNewCatName('');
     } catch (err: unknown) {
       setErrorMsg((err as Error).message || 'Failed to create category');
@@ -261,15 +268,18 @@ export function TransactionFormModal({
             </div>
           </div>
 
-          {/* Category Selector + Quick Add */}
+          {/* Custom Touch-Friendly Category Selector */}
           <div>
-            <div className="flex items-center justify-between mb-1">
-              <label htmlFor="category" className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <div className="flex items-center justify-between mb-1.5">
+              <label className="block text-xs font-semibold text-slate-500 uppercase tracking-wider">
                 Category
               </label>
               <button
                 type="button"
-                onClick={() => setIsCreatingCategory(!isCreatingCategory)}
+                onClick={() => {
+                  setIsCreatingCategory(!isCreatingCategory);
+                  setIsCategoryPickerOpen(false);
+                }}
                 className="text-xs font-bold text-slate-900 hover:text-slate-700 inline-flex items-center gap-1 cursor-pointer"
               >
                 <Plus className="w-3.5 h-3.5" />
@@ -278,21 +288,21 @@ export function TransactionFormModal({
             </div>
 
             {isCreatingCategory ? (
-              <div className="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-2.5">
+              <div className="p-3.5 bg-slate-50 rounded-xl border border-slate-200 space-y-3">
                 <input
                   type="text"
                   placeholder="Category Name (e.g. Dining)"
                   value={newCatName}
                   onChange={(e) => setNewCatName(e.target.value)}
-                  className="w-full px-3 py-2 rounded-lg border border-slate-200 text-xs font-medium bg-white"
+                  className="w-full px-3.5 py-2.5 rounded-lg border border-slate-200 text-xs font-semibold bg-white"
                 />
                 {kind === 'expense' && (
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium text-slate-500">Bucket:</span>
+                    <span className="text-xs font-semibold text-slate-500">Bucket:</span>
                     <button
                       type="button"
                       onClick={() => setNewCatBucket('needs')}
-                      className={`px-3 py-1 text-xs font-bold rounded-md ${
+                      className={`px-3 py-1.5 text-xs font-bold rounded-lg cursor-pointer ${
                         newCatBucket === 'needs' ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-700'
                       }`}
                     >
@@ -301,7 +311,7 @@ export function TransactionFormModal({
                     <button
                       type="button"
                       onClick={() => setNewCatBucket('wants')}
-                      className={`px-3 py-1 text-xs font-bold rounded-md ${
+                      className={`px-3 py-1.5 text-xs font-bold rounded-lg cursor-pointer ${
                         newCatBucket === 'wants' ? 'bg-slate-900 text-white' : 'bg-slate-200 text-slate-700'
                       }`}
                     >
@@ -312,28 +322,65 @@ export function TransactionFormModal({
                 <button
                   type="button"
                   onClick={handleAddCategory}
-                  className="w-full py-2 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800"
+                  className="w-full py-2.5 bg-slate-900 text-white rounded-lg text-xs font-bold hover:bg-slate-800 cursor-pointer"
                 >
                   Create & Select Category
                 </button>
               </div>
             ) : (
-              <select
-                id="category"
-                required
-                value={categoryId}
-                onChange={(e) => setCategoryId(e.target.value)}
-                className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm font-semibold text-slate-900 bg-white cursor-pointer"
-              >
-                {availableCategories.length === 0 && (
-                  <option value="">No categories available</option>
+              <div className="space-y-2">
+                {/* Trigger Button */}
+                <button
+                  type="button"
+                  onClick={() => setIsCategoryPickerOpen(!isCategoryPickerOpen)}
+                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white flex items-center justify-between text-left hover:border-slate-300 focus:outline-none focus:ring-2 focus:ring-slate-900 cursor-pointer shadow-2xs"
+                >
+                  <div className="flex items-center gap-2">
+                    <Tag className="w-4 h-4 text-slate-400" />
+                    <span className="text-sm font-bold text-slate-900">
+                      {selectedCategoryObj
+                        ? `${selectedCategoryObj.name} ${selectedCategoryObj.default_bucket ? `(${selectedCategoryObj.default_bucket})` : ''}`
+                        : 'Select Category'}
+                    </span>
+                  </div>
+                  <ChevronDown className={`w-4 h-4 text-slate-400 transition-transform ${isCategoryPickerOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {/* Custom Category Selection Chips */}
+                {isCategoryPickerOpen && (
+                  <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200 space-y-2 max-h-48 overflow-y-auto">
+                    {availableCategories.length === 0 ? (
+                      <p className="text-xs text-slate-400 text-center py-2">No categories available for {kind}.</p>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-1.5">
+                        {availableCategories.map((c) => {
+                          const isSelected = c.id === categoryId;
+                          return (
+                            <button
+                              key={c.id}
+                              type="button"
+                              onClick={() => {
+                                setCategoryId(c.id);
+                                setIsCategoryPickerOpen(false);
+                              }}
+                              className={`w-full px-3.5 py-2.5 rounded-xl text-xs font-bold flex items-center justify-between transition-all cursor-pointer ${
+                                isSelected
+                                  ? 'bg-slate-900 text-white shadow-xs'
+                                  : 'bg-white text-slate-700 hover:bg-slate-100 border border-slate-100'
+                              }`}
+                            >
+                              <span>
+                                {c.name} {c.default_bucket ? `(${c.default_bucket})` : ''}
+                              </span>
+                              {isSelected && <Check className="w-4 h-4 text-white" />}
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
                 )}
-                {availableCategories.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name} {c.default_bucket ? `(${c.default_bucket})` : ''}
-                  </option>
-                ))}
-              </select>
+              </div>
             )}
           </div>
 
@@ -364,7 +411,7 @@ export function TransactionFormModal({
               required
               value={transactionDate}
               onChange={(e) => setTransactionDate(e.target.value)}
-              className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm font-medium text-slate-900 bg-white cursor-pointer"
+              className="w-full px-3.5 py-3 rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-slate-900 text-sm font-semibold text-slate-900 bg-white cursor-pointer"
             />
           </div>
 

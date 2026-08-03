@@ -1,3 +1,5 @@
+import { redirect } from 'next/navigation';
+import { createClient } from '@/lib/supabase/server';
 import { AppShell } from '@/components/layout/AppShell';
 import { ensureOnboardedUser } from '@/lib/onboarding';
 
@@ -8,12 +10,19 @@ export default async function ProtectedLayout({
 }: {
   children: React.ReactNode;
 }) {
-  // Execute transactional user onboarding before rendering protected routes
+  const supabase = await createClient();
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+
+  // If user is not authenticated, redirect cleanly to /login
+  if (userError || !userData?.user) {
+    redirect('/login');
+  }
+
+  // Execute transactional user onboarding for authenticated users
   try {
     await ensureOnboardedUser();
   } catch (error) {
-    // Note: If authentication or database connection fails, error will bubble or redirect
-    console.error('Protected layout onboarding verification:', error);
+    console.error('Protected layout onboarding verification error:', error);
   }
 
   return <AppShell>{children}</AppShell>;

@@ -1,4 +1,4 @@
-import 'server-only';
+'use server';
 import { createClient } from '@/lib/supabase/server';
 import { updateBudgetPlanSchema, UpdateBudgetPlanInput } from '@/lib/validations/budget-plan';
 

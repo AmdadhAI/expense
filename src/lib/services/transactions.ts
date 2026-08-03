@@ -1,4 +1,4 @@
-import 'server-only';
+'use server';
 import { createClient } from '@/lib/supabase/server';
 import { parseDecimalToPoisha, formatPoishaToDecimal } from '@/lib/money';
 import { createTransactionSchema, updateTransactionSchema, CreateTransactionInput, UpdateTransactionInput } from '@/lib/validations/transaction';

@@ -1,53 +1,246 @@
+'use client';
+
+import { useState, useEffect, useTransition } from 'react';
+import { useRouter } from 'next/navigation';
+import { getMonthlyReport, MonthlyReportDTO } from '@/lib/services/reports';
+import { Plus, ArrowUpRight, ArrowDownRight, Wallet, PiggyBank, RefreshCw } from 'lucide-react';
+
 export default function DashboardPage() {
+  const [report, setReport] = useState<MonthlyReportDTO | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  
+  const now = new Date();
+  const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
+  const [isPending, startTransition] = useTransition();
+
+  const loadReport = (year: number, month: number) => {
+    setIsLoading(true);
+    setErrorMsg(null);
+    getMonthlyReport(year, month)
+      .then((data) => {
+        setReport(data);
+        setIsLoading(false);
+      })
+      .catch((err: unknown) => {
+        setErrorMsg((err as Error).message || 'Failed to load dashboard report');
+        setIsLoading(false);
+      });
+  };
+
+  useEffect(() => {
+    loadReport(selectedYear, selectedMonth);
+  }, [selectedYear, selectedMonth]);
+
+  const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = Number(e.target.value);
+    setSelectedMonth(val);
+  };
+
+  if (isLoading && !report) {
+    return (
+      <div className="p-8 text-center space-y-4">
+        <div className="inline-block animate-spin rounded-full h-8 w-8 border-4 border-slate-900 border-t-transparent"></div>
+        <p className="text-sm font-medium text-slate-500">Loading Dashboard...</p>
+      </div>
+    );
+  }
+
+  if (errorMsg && !report) {
+    return (
+      <div className="p-6 rounded-2xl bg-rose-50 border border-rose-100 space-y-3 text-center">
+        <p className="text-sm font-semibold text-rose-600">{errorMsg}</p>
+        <button
+          onClick={() => loadReport(selectedYear, selectedMonth)}
+          className="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-semibold hover:bg-rose-700 transition-colors inline-flex items-center gap-1.5"
+        >
+          <RefreshCw className="w-3.5 h-3.5" /> Retry
+        </button>
+      </div>
+    );
+  }
+
+  const isNegativeAvailable = report && BigInt(report.available_poisha_str) < 0n;
+
   return (
     <div className="space-y-6">
-      <header className="flex items-center justify-between">
+      {/* Header & Month Selector */}
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Dashboard</h1>
-          <p className="text-sm text-slate-500">Monthly Financial Summary (Asia/Dhaka)</p>
+          <p className="text-sm text-slate-500">Monthly Allocation & Summaries (Asia/Dhaka)</p>
         </div>
-        <div className="px-3 py-1.5 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700">
-          August 2026
+
+        <div className="flex items-center gap-2">
+          <select
+            value={selectedMonth}
+            onChange={handleMonthChange}
+            className="px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-900 cursor-pointer shadow-xs"
+          >
+            {Array.from({ length: 12 }, (_, i) => i + 1).map((m) => (
+              <option key={m} value={m}>
+                {new Date(2026, m - 1, 1).toLocaleString('en-US', { month: 'long' })} 2026
+              </option>
+            ))}
+          </select>
         </div>
       </header>
 
-      {/* Summary Cards Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-xs">
-          <span className="text-xs font-medium text-blue-600 uppercase tracking-wider">Income</span>
-          <p className="text-xl font-bold text-slate-900 mt-2">৳ 0.00</p>
+      {/* 4 Primary Summary Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Income Card */}
+        <div className="p-5 rounded-2xl bg-white border border-slate-100 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-blue-600 uppercase tracking-wider">Income</span>
+            <div className="p-2 rounded-xl bg-blue-50 text-blue-600">
+              <ArrowUpRight className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-4">
+            <p className="text-2xl font-bold text-slate-900 tracking-tight">{report?.income_bdt || '৳ 0.00'}</p>
+          </div>
         </div>
-        <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-xs">
-          <span className="text-xs font-medium text-rose-600 uppercase tracking-wider">Expenses</span>
-          <p className="text-xl font-bold text-slate-900 mt-2">৳ 0.00</p>
+
+        {/* Expenses Card */}
+        <div className="p-5 rounded-2xl bg-white border border-slate-100 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-rose-600 uppercase tracking-wider">Expenses</span>
+            <div className="p-2 rounded-xl bg-rose-50 text-rose-600">
+              <ArrowDownRight className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-4">
+            <p className="text-2xl font-bold text-slate-900 tracking-tight">{report?.expenses_bdt || '৳ 0.00'}</p>
+            <p className="text-xs text-slate-400 mt-1">
+              Needs: {report?.needs_bdt} · Wants: {report?.wants_bdt}
+            </p>
+          </div>
         </div>
-        <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-xs">
-          <span className="text-xs font-medium text-emerald-600 uppercase tracking-wider">Saved</span>
-          <p className="text-xl font-bold text-slate-900 mt-2">৳ 0.00</p>
+
+        {/* Saved Card */}
+        <div className="p-5 rounded-2xl bg-white border border-slate-100 shadow-xs flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-emerald-600 uppercase tracking-wider">Saved</span>
+            <div className="p-2 rounded-xl bg-emerald-50 text-emerald-600">
+              <PiggyBank className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-4">
+            <p className="text-2xl font-bold text-slate-900 tracking-tight">{report?.savings_bdt || '৳ 0.00'}</p>
+            <p className="text-xs text-emerald-600 font-medium mt-1">
+              {(report?.savings_rate_bp || 0) / 100}% Savings Rate
+            </p>
+          </div>
         </div>
-        <div className="p-4 rounded-2xl bg-white border border-slate-100 shadow-xs">
-          <span className="text-xs font-medium text-slate-600 uppercase tracking-wider">Available</span>
-          <p className="text-xl font-bold text-slate-900 mt-2">৳ 0.00</p>
+
+        {/* Available Card */}
+        <div className={`p-5 rounded-2xl bg-white border shadow-xs flex flex-col justify-between ${
+          isNegativeAvailable ? 'border-rose-300 bg-rose-50/30' : 'border-slate-100'
+        }`}>
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-600 uppercase tracking-wider">Available</span>
+            <div className={`p-2 rounded-xl ${isNegativeAvailable ? 'bg-rose-100 text-rose-600' : 'bg-slate-100 text-slate-700'}`}>
+              <Wallet className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-4">
+            <p className={`text-2xl font-bold tracking-tight ${
+              isNegativeAvailable ? 'text-rose-600' : 'text-slate-900'
+            }`}>
+              {report?.available_bdt || '৳ 0.00'}
+            </p>
+            <p className="text-xs text-slate-400 mt-1">Income - Expenses - Savings</p>
+          </div>
         </div>
       </div>
 
-      {/* Target Progress Section Placeholder */}
-      <div className="p-6 rounded-2xl bg-white border border-slate-100 space-y-4">
-        <h2 className="text-sm font-semibold text-slate-900">Allocation Target Progress</h2>
-        <div className="space-y-3 text-xs text-slate-500">
-          <div className="flex justify-between items-center py-2 border-b border-slate-50">
-            <span>Needs (Target 20%)</span>
-            <span className="font-semibold text-slate-700">৳ 0.00 / ৳ 0.00</span>
+      {/* Allocation Targets Progress */}
+      <div className="p-6 rounded-2xl bg-white border border-slate-100 space-y-5 shadow-xs">
+        <h2 className="text-sm font-semibold text-slate-900">2026 Target Allocations</h2>
+
+        <div className="space-y-4">
+          {/* Needs Target */}
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-xs">
+              <span className="font-semibold text-slate-700">Needs (Target 20%)</span>
+              <span className="text-slate-500 font-medium">
+                {report?.needs_bdt} / {report ? `৳ ${Number(report.needs_target_decimal).toLocaleString('en-BD', { minimumFractionDigits: 2 })}` : '৳ 0.00'}
+              </span>
+            </div>
+            <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-rose-500 rounded-full transition-all duration-300"
+                style={{ width: `${Math.min((report?.needs_budget_used_bp || 0) / 100, 100)}%` }}
+              ></div>
+            </div>
           </div>
-          <div className="flex justify-between items-center py-2 border-b border-slate-50">
-            <span>Wants (Target 10%)</span>
-            <span className="font-semibold text-slate-700">৳ 0.00 / ৳ 0.00</span>
+
+          {/* Wants Target */}
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-xs">
+              <span className="font-semibold text-slate-700">Wants (Target 10%)</span>
+              <span className="text-slate-500 font-medium">
+                {report?.wants_bdt} / {report ? `৳ ${Number(report.wants_target_decimal).toLocaleString('en-BD', { minimumFractionDigits: 2 })}` : '৳ 0.00'}
+              </span>
+            </div>
+            <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-amber-500 rounded-full transition-all duration-300"
+                style={{ width: `${Math.min((report?.wants_budget_used_bp || 0) / 100, 100)}%` }}
+              ></div>
+            </div>
           </div>
-          <div className="flex justify-between items-center py-2">
-            <span>Savings (Target 70%)</span>
-            <span className="font-semibold text-slate-700">৳ 0.00 / ৳ 0.00</span>
+
+          {/* Savings Target */}
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-xs">
+              <span className="font-semibold text-slate-700">Savings (Target 70%)</span>
+              <span className="text-slate-500 font-medium">
+                {report?.savings_bdt} / {report ? `৳ ${Number(report.savings_target_decimal).toLocaleString('en-BD', { minimumFractionDigits: 2 })}` : '৳ 0.00'}
+              </span>
+            </div>
+            <div className="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-emerald-500 rounded-full transition-all duration-300"
+                style={{ width: `${Math.min((report?.savings_budget_used_bp || 0) / 100, 100)}%` }}
+              ></div>
+            </div>
           </div>
         </div>
+      </div>
+
+      {/* Recent Transactions List */}
+      <div className="p-6 rounded-2xl bg-white border border-slate-100 space-y-4 shadow-xs">
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-slate-900">Recent Transactions</h2>
+        </div>
+
+        {!report?.recent_transactions || report.recent_transactions.length === 0 ? (
+          <div className="py-8 text-center space-y-2">
+            <p className="text-xs font-medium text-slate-500">No transactions recorded for this month.</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-slate-100">
+            {report.recent_transactions.map((t) => (
+              <div key={t.id} className="py-3 flex items-center justify-between text-xs">
+                <div>
+                  <p className="font-semibold text-slate-800">{t.description}</p>
+                  <p className="text-slate-400">{t.transaction_date}</p>
+                </div>
+                <div className={`font-bold ${
+                  t.kind === 'income'
+                    ? 'text-blue-600'
+                    : t.kind === 'saving'
+                    ? 'text-emerald-600'
+                    : 'text-rose-600'
+                }`}>
+                  {t.kind === 'income' ? '+' : '-'} ৳ {Number(t.amount_decimal).toLocaleString('en-BD', { minimumFractionDigits: 2 })}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

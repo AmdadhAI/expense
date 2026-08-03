@@ -1,6 +1,43 @@
 {
   "communities": {
     "0": [
+      "eslint",
+      "eslint_config_next",
+      "package",
+      "package_devdependencies",
+      "package_devdependencies_eslint",
+      "package_devdependencies_eslint_config_next",
+      "package_devdependencies_supabase",
+      "package_devdependencies_tailwindcss",
+      "package_devdependencies_tailwindcss_postcss",
+      "package_devdependencies_types_node",
+      "package_devdependencies_types_react",
+      "package_devdependencies_types_react_dom",
+      "package_devdependencies_typescript",
+      "package_devdependencies_vitest",
+      "package_name",
+      "package_private",
+      "package_scripts",
+      "package_scripts_build",
+      "package_scripts_dev",
+      "package_scripts_lint",
+      "package_scripts_start",
+      "package_scripts_test",
+      "package_scripts_test_rls",
+      "package_scripts_typecheck",
+      "package_scripts_update_types",
+      "package_type",
+      "package_version",
+      "supabase",
+      "tailwindcss",
+      "tailwindcss_postcss",
+      "types_node",
+      "types_react",
+      "types_react_dom",
+      "typescript",
+      "vitest"
+    ],
+    "1": [
       "ref_dom",
       "ref_dom_iterable",
       "ref_esnext",
@@ -30,61 +67,40 @@
       "tsconfig_exclude",
       "tsconfig_include"
     ],
-    "1": [
-      "src_lib_calculations",
-      "src_lib_calculations_budgettargetsinput",
-      "src_lib_calculations_calculatesummaries",
-      "src_lib_calculations_formatpoishatodecimal",
-      "src_lib_calculations_parsedecimaltopoisha",
-      "src_lib_calculations_summaryresult",
-      "src_lib_calculations_test",
-      "src_lib_calculations_transactioninput",
+    "2": [
+      "autoprefixer",
+      "clsx",
+      "lucide_react",
+      "next",
+      "package_dependencies",
+      "package_dependencies_autoprefixer",
+      "package_dependencies_clsx",
+      "package_dependencies_lucide_react",
+      "package_dependencies_next",
+      "package_dependencies_postcss",
+      "package_dependencies_react",
+      "package_dependencies_react_dom",
+      "package_dependencies_supabase_ssr",
+      "package_dependencies_supabase_supabase_js",
+      "package_dependencies_tailwind_merge",
+      "package_dependencies_zod",
+      "postcss",
+      "react",
+      "react_dom",
+      "supabase_ssr",
+      "supabase_supabase_js",
+      "tailwind_merge",
+      "zod"
+    ],
+    "3": [
+      "src_app_protected_transactions_page",
+      "src_app_protected_transactions_page_transactionspage",
       "src_lib_money",
       "src_lib_money_formatpoishatobdt",
       "src_lib_money_formatpoishatodecimal",
-      "src_lib_services_backend_test",
-      "src_lib_services_budget_plans",
-      "src_lib_services_budget_plans_budgetplandto",
-      "src_lib_services_budget_plans_getbudgetplanforyear",
-      "src_lib_services_budget_plans_updatebudgetplan",
-      "src_lib_services_reports",
-      "src_lib_services_reports_getmonthlyreport",
-      "src_lib_services_reports_getyearlyreport",
-      "src_lib_services_reports_month_names",
-      "src_lib_services_reports_monthlyoverviewdto",
-      "src_lib_services_reports_yearlyreportdto",
-      "src_lib_validations_budget_plan",
-      "src_lib_validations_budget_plan_updatebudgetplaninput",
-      "src_lib_validations_budget_plan_updatebudgetplanschema"
-    ],
-    "2": [
-      "eslint",
-      "eslint_config_next",
-      "package_devdependencies",
-      "package_devdependencies_eslint",
-      "package_devdependencies_eslint_config_next",
-      "package_devdependencies_supabase",
-      "package_devdependencies_tailwindcss",
-      "package_devdependencies_tailwindcss_postcss",
-      "package_devdependencies_types_node",
-      "package_devdependencies_types_react",
-      "package_devdependencies_types_react_dom",
-      "package_devdependencies_typescript",
-      "package_devdependencies_vitest",
-      "supabase",
-      "tailwindcss",
-      "tailwindcss_postcss",
-      "types_node",
-      "types_react",
-      "types_react_dom",
-      "typescript",
-      "vitest"
-    ],
-    "3": [
       "src_lib_money_parsedecimaltopoisha",
+      "src_lib_services_backend_test",
       "src_lib_services_categories_categorydto",
-      "src_lib_services_reports_categorysummarydto",
-      "src_lib_services_reports_monthlyreportdto",
       "src_lib_services_transactions",
       "src_lib_services_transactions_createtransaction",
       "src_lib_services_transactions_deletetransaction",
@@ -98,77 +114,64 @@
       "src_lib_validations_transaction_createtransactioninput",
       "src_lib_validations_transaction_createtransactionschema",
       "src_lib_validations_transaction_updatetransactioninput",
-      "src_lib_validations_transaction_updatetransactionschema",
-      "src_types_database_types_transactionbucket",
-      "src_types_database_types_transactionkind"
+      "src_lib_validations_transaction_updatetransactionschema"
     ],
     "4": [
-      "clsx",
-      "lucide_react",
-      "next",
-      "package_dependencies",
-      "package_dependencies_clsx",
-      "package_dependencies_lucide_react",
-      "package_dependencies_next",
-      "package_dependencies_react",
-      "package_dependencies_react_dom",
-      "package_dependencies_supabase_ssr",
-      "package_dependencies_supabase_supabase_js",
-      "package_dependencies_tailwind_merge",
-      "package_dependencies_zod",
-      "react",
-      "react_dom",
-      "supabase_ssr",
-      "supabase_supabase_js",
-      "tailwind_merge",
-      "zod"
+      "src_app_protected_dashboard_page",
+      "src_app_protected_dashboard_page_dashboardpage",
+      "src_app_protected_review_yearly_page",
+      "src_app_protected_review_yearly_page_yearlyreviewpage",
+      "src_lib_calculations",
+      "src_lib_calculations_budgettargetsinput",
+      "src_lib_calculations_calculatesummaries",
+      "src_lib_calculations_formatpoishatodecimal",
+      "src_lib_calculations_parsedecimaltopoisha",
+      "src_lib_calculations_summaryresult",
+      "src_lib_calculations_test",
+      "src_lib_calculations_transactioninput",
+      "src_lib_services_reports",
+      "src_lib_services_reports_categorysummarydto",
+      "src_lib_services_reports_getmonthlyreport",
+      "src_lib_services_reports_getyearlyreport",
+      "src_lib_services_reports_month_names",
+      "src_lib_services_reports_monthlyoverviewdto",
+      "src_lib_services_reports_monthlyreportdto",
+      "src_lib_services_reports_yearlyreportdto"
     ],
     "5": [
-      "package",
-      "package_name",
-      "package_private",
-      "package_scripts",
-      "package_scripts_build",
-      "package_scripts_dev",
-      "package_scripts_lint",
-      "package_scripts_start",
-      "package_scripts_test",
-      "package_scripts_test_rls",
-      "package_scripts_typecheck",
-      "package_scripts_update_types",
-      "package_type",
-      "package_version"
-    ],
-    "6": [
       "src_app_protected_layout",
       "src_app_protected_layout_protectedlayout",
-      "src_components_layout_appshell",
-      "src_components_layout_appshell_appshell",
-      "src_components_layout_desktopsidebar",
-      "src_components_layout_desktopsidebar_desktopsidebar",
-      "src_components_layout_mobilenav",
-      "src_components_layout_mobilenav_mobilenav",
-      "src_components_ui_addtransactionbutton",
-      "src_components_ui_addtransactionbutton_addtransactionbutton",
       "src_lib_onboarding",
       "src_lib_onboarding_ensureonboardeduser",
-      "src_lib_supabase_server_createclient"
+      "src_lib_services_monthly_notes",
+      "src_lib_services_monthly_notes_deletemonthlynote",
+      "src_lib_services_monthly_notes_getmonthlynote",
+      "src_lib_services_monthly_notes_monthlynotedto",
+      "src_lib_services_monthly_notes_upsertmonthlynote",
+      "src_lib_supabase_server",
+      "src_lib_supabase_server_createclient",
+      "src_lib_validations_monthly_note",
+      "src_lib_validations_monthly_note_upsertmonthlynoteinput",
+      "src_lib_validations_monthly_note_upsertmonthlynoteschema"
+    ],
+    "6": [
+      "src_components_layout_appshell",
+      "src_components_layout_desktopsidebar",
+      "src_components_layout_desktopsidebar_desktopsidebar",
+      "src_components_layout_desktopsidebar_desktopsidebarprops",
+      "src_components_layout_mobilenav",
+      "src_components_layout_mobilenav_mobilenav",
+      "src_components_layout_mobilenav_mobilenavprops",
+      "src_components_transactions_transactionformmodal",
+      "src_components_transactions_transactionformmodal_categoryoption",
+      "src_components_transactions_transactionformmodal_transactionformmodal",
+      "src_components_transactions_transactionformmodal_transactionformmodalprops",
+      "src_components_ui_addtransactionbutton",
+      "src_components_ui_addtransactionbutton_addtransactionbutton",
+      "src_components_ui_addtransactionbutton_addtransactionbuttonprops"
     ],
     "7": [
-      "src_app_login_page",
-      "src_app_login_page_loginpage",
-      "src_app_protected_settings_page",
-      "src_app_protected_settings_page_settingspage",
-      "src_lib_supabase_client",
-      "src_lib_supabase_client_createclient",
-      "src_lib_supabase_server",
-      "src_types_database_types",
-      "src_types_database_types_database",
-      "src_types_database_types_expensebucket",
-      "src_types_database_types_json",
-      "src_types_database_types_savingbucket"
-    ],
-    "8": [
+      "src_components_layout_appshell_appshell",
       "src_lib_services_categories",
       "src_lib_services_categories_archivecategory",
       "src_lib_services_categories_createcategory",
@@ -182,15 +185,29 @@
       "src_lib_validations_category_updatecategoryinput",
       "src_lib_validations_category_updatecategoryschema"
     ],
+    "8": [
+      "src_app_login_page",
+      "src_app_login_page_loginpage",
+      "src_lib_supabase_client",
+      "src_lib_supabase_client_createclient",
+      "src_types_database_types",
+      "src_types_database_types_database",
+      "src_types_database_types_expensebucket",
+      "src_types_database_types_json",
+      "src_types_database_types_savingbucket",
+      "src_types_database_types_transactionbucket",
+      "src_types_database_types_transactionkind"
+    ],
     "9": [
-      "src_lib_services_monthly_notes",
-      "src_lib_services_monthly_notes_deletemonthlynote",
-      "src_lib_services_monthly_notes_getmonthlynote",
-      "src_lib_services_monthly_notes_monthlynotedto",
-      "src_lib_services_monthly_notes_upsertmonthlynote",
-      "src_lib_validations_monthly_note",
-      "src_lib_validations_monthly_note_upsertmonthlynoteinput",
-      "src_lib_validations_monthly_note_upsertmonthlynoteschema"
+      "src_app_protected_settings_page",
+      "src_app_protected_settings_page_settingspage",
+      "src_lib_services_budget_plans",
+      "src_lib_services_budget_plans_budgetplandto",
+      "src_lib_services_budget_plans_getbudgetplanforyear",
+      "src_lib_services_budget_plans_updatebudgetplan",
+      "src_lib_validations_budget_plan",
+      "src_lib_validations_budget_plan_updatebudgetplaninput",
+      "src_lib_validations_budget_plan_updatebudgetplanschema"
     ],
     "10": [
       "proxy",
@@ -213,38 +230,29 @@
       "src_app_page_homepage"
     ],
     "14": [
-      "src_app_protected_dashboard_page",
-      "src_app_protected_dashboard_page_dashboardpage"
-    ],
-    "15": [
-      "src_app_protected_review_yearly_page",
-      "src_app_protected_review_yearly_page_yearlyreviewpage"
-    ],
-    "16": [
-      "src_app_protected_transactions_page",
-      "src_app_protected_transactions_page_transactionspage"
-    ],
-    "17": [
       "eslint_config"
     ],
-    "18": [
+    "15": [
+      "postcss_config"
+    ],
+    "16": [
       "scripts_test_rls"
     ],
-    "19": [
+    "17": [
       "vitest_config"
     ]
   },
   "cohesion": {
-    "0": 0.07142857142857142,
-    "1": 0.16,
-    "2": 0.09523809523809523,
-    "3": 0.18421052631578946,
-    "4": 0.10526315789473684,
-    "5": 0.14285714285714285,
-    "6": 0.2692307692307692,
-    "7": 0.22727272727272727,
-    "8": 0.30303030303030304,
-    "9": 0.32142857142857145,
+    "0": 0.05714285714285714,
+    "1": 0.07142857142857142,
+    "2": 0.08695652173913043,
+    "3": 0.19913419913419914,
+    "4": 0.1631578947368421,
+    "5": 0.21978021978021978,
+    "6": 0.21978021978021978,
+    "7": 0.2692307692307692,
+    "8": 0.21818181818181817,
+    "9": 0.3611111111111111,
     "10": 0.6,
     "11": 0.6666666666666666,
     "12": 1.0,
@@ -252,9 +260,7 @@
     "14": 1.0,
     "15": 1.0,
     "16": 1.0,
-    "17": 1.0,
-    "18": 1.0,
-    "19": 1.0
+    "17": 1.0
   },
   "gods": [
     {
@@ -268,23 +274,13 @@
       "degree": 9
     },
     {
-      "id": "src_types_database_types_transactionkind",
-      "label": "TransactionKind",
-      "degree": 9
-    },
-    {
       "id": "src_lib_supabase_server_createclient",
       "label": "createClient()",
       "degree": 8
     },
     {
-      "id": "src_lib_money_formatpoishatodecimal",
-      "label": "formatPoishaToDecimal()",
-      "degree": 8
-    },
-    {
-      "id": "src_types_database_types_transactionbucket",
-      "label": "TransactionBucket",
+      "id": "src_lib_services_categories_listcategories",
+      "label": "listCategories()",
       "degree": 7
     },
     {
@@ -293,19 +289,29 @@
       "degree": 6
     },
     {
+      "id": "src_types_database_types_transactionkind",
+      "label": "TransactionKind",
+      "degree": 6
+    },
+    {
       "id": "src_lib_money_parsedecimaltopoisha",
       "label": "parseDecimalToPoisha()",
-      "degree": 6
+      "degree": 5
     },
     {
-      "id": "src_lib_money_formatpoishatobdt",
-      "label": "formatPoishaToBDT()",
-      "degree": 6
+      "id": "src_lib_money_formatpoishatodecimal",
+      "label": "formatPoishaToDecimal()",
+      "degree": 5
     },
     {
-      "id": "src_lib_services_transactions_formattransactiondto",
-      "label": "formatTransactionDTO()",
-      "degree": 6
+      "id": "src_types_database_types_transactionbucket",
+      "label": "TransactionBucket",
+      "degree": 5
+    },
+    {
+      "id": "src_lib_services_budget_plans_getbudgetplanforyear",
+      "label": "getBudgetPlanForYear()",
+      "degree": 5
     }
   ],
   "surprises": [
@@ -321,37 +327,37 @@
       "why": "connects across different repos/directories"
     },
     {
-      "source": "formatTransactionDTO()",
-      "target": "formatPoishaToDecimal()",
+      "source": "SettingsPage()",
+      "target": "getBudgetPlanForYear()",
       "source_files": [
-        "src/lib/services/transactions.ts",
-        "src/lib/money.ts"
+        "src/app/(protected)/settings/page.tsx",
+        "src/lib/services/budget-plans.ts"
+      ],
+      "confidence": "EXTRACTED",
+      "relation": "calls",
+      "why": "peripheral node `SettingsPage()` unexpectedly reaches hub `getBudgetPlanForYear()`"
+    },
+    {
+      "source": "TransactionsPage()",
+      "target": "listCategories()",
+      "source_files": [
+        "src/app/(protected)/transactions/page.tsx",
+        "src/lib/services/categories.ts"
       ],
       "confidence": "EXTRACTED",
       "relation": "calls",
       "why": "bridges separate communities"
     },
     {
-      "source": "MonthlyReportDTO",
-      "target": "TransactionKind",
+      "source": "getMonthlyReport()",
+      "target": "getBudgetPlanForYear()",
       "source_files": [
         "src/lib/services/reports.ts",
-        "src/types/database.types.ts"
+        "src/lib/services/budget-plans.ts"
       ],
       "confidence": "EXTRACTED",
-      "relation": "references",
-      "why": "peripheral node `MonthlyReportDTO` unexpectedly reaches hub `TransactionKind`"
-    },
-    {
-      "source": "ListTransactionsParams",
-      "target": "TransactionKind",
-      "source_files": [
-        "src/lib/services/transactions.ts",
-        "src/types/database.types.ts"
-      ],
-      "confidence": "EXTRACTED",
-      "relation": "references",
-      "why": "peripheral node `ListTransactionsParams` unexpectedly reaches hub `TransactionKind`"
+      "relation": "calls",
+      "why": "bridges separate communities"
     },
     {
       "source": "ProtectedLayout()",

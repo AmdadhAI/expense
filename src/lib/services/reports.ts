@@ -1,4 +1,4 @@
-import 'server-only';
+'use server';
 import { createClient } from '@/lib/supabase/server';
 import { calculateSummaries, TransactionInput } from '@/lib/calculations';
 import { formatPoishaToDecimal, formatPoishaToBDT } from '@/lib/money';

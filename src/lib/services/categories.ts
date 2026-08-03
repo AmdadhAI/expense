@@ -1,4 +1,4 @@
-import 'server-only';
+'use server';
 import { createClient } from '@/lib/supabase/server';
 import { createCategorySchema, updateCategorySchema, CreateCategoryInput, UpdateCategoryInput } from '@/lib/validations/category';
 import { TransactionKind, TransactionBucket } from '@/types/database.types';

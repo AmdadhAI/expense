@@ -5,7 +5,11 @@ import { usePathname } from 'next/navigation';
 import { LayoutDashboard, ReceiptText, Calendar, Settings } from 'lucide-react';
 import { AddTransactionButton } from '@/components/ui/AddTransactionButton';
 
-export function MobileNav() {
+interface MobileNavProps {
+  onAddTransaction?: () => void;
+}
+
+export function MobileNav({ onAddTransaction }: MobileNavProps) {
   const pathname = usePathname();
 
   const navItems = [
@@ -35,7 +39,7 @@ export function MobileNav() {
       })}
 
       <div className="-mt-5">
-        <AddTransactionButton />
+        <AddTransactionButton onClick={onAddTransaction} />
       </div>
 
       {navItems.slice(2).map((item) => {

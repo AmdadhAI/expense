@@ -2,16 +2,20 @@
 
 import { Plus } from 'lucide-react';
 
-export function AddTransactionButton() {
+interface AddTransactionButtonProps {
+  onClick?: () => void;
+}
+
+export function AddTransactionButton({ onClick }: AddTransactionButtonProps) {
   return (
     <button
-      disabled
-      aria-disabled="true"
-      title="Add Transaction (Phase 2)"
-      className="inline-flex items-center justify-center p-3 rounded-full bg-slate-200 text-slate-400 cursor-not-allowed opacity-60 shadow-none border border-slate-300"
+      onClick={onClick}
+      aria-label="Add Transaction"
+      title="Add Transaction"
+      className="inline-flex items-center justify-center p-3 rounded-full bg-slate-900 text-white cursor-pointer hover:bg-slate-800 transition-colors shadow-md border border-slate-900"
     >
       <Plus className="w-5 h-5" />
-      <span className="sr-only">Add Transaction (Phase 2)</span>
+      <span className="sr-only">Add Transaction</span>
     </button>
   );
 }

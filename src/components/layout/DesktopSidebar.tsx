@@ -5,7 +5,11 @@ import { usePathname } from 'next/navigation';
 import { LayoutDashboard, ReceiptText, Calendar, Settings } from 'lucide-react';
 import { AddTransactionButton } from '@/components/ui/AddTransactionButton';
 
-export function DesktopSidebar() {
+interface DesktopSidebarProps {
+  onAddTransaction?: () => void;
+}
+
+export function DesktopSidebar({ onAddTransaction }: DesktopSidebarProps) {
   const pathname = usePathname();
 
   const navItems = [
@@ -25,10 +29,13 @@ export function DesktopSidebar() {
       </div>
 
       <div className="mb-6">
-        <div className="flex items-center gap-3 p-2 bg-slate-50 rounded-xl border border-slate-100">
-          <AddTransactionButton />
-          <span className="text-xs font-medium text-slate-400">Phase 2 Action</span>
-        </div>
+        <button
+          onClick={onAddTransaction}
+          className="w-full flex items-center justify-center gap-2 p-3 bg-slate-900 hover:bg-slate-800 text-white rounded-xl text-xs font-semibold transition-colors cursor-pointer"
+        >
+          <AddTransactionButton onClick={onAddTransaction} />
+          <span>Add Transaction</span>
+        </button>
       </div>
 
       <nav aria-label="Sidebar navigation links" className="space-y-1 flex-1">

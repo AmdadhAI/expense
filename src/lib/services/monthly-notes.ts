@@ -1,4 +1,4 @@
-import 'server-only';
+'use server';
 import { createClient } from '@/lib/supabase/server';
 import { upsertMonthlyNoteSchema, UpsertMonthlyNoteInput } from '@/lib/validations/monthly-note';
 

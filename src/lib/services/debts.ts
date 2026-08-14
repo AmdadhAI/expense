@@ -53,6 +53,9 @@ export async function listDebts(filters?: {
 
   const { data, error } = await query;
   if (error) {
+    if (error.code === '42P01' || error.message.includes('Could not find the table')) {
+      return [];
+    }
     throw new Error(`Failed to list debts: ${error.message}`);
   }
 
@@ -76,6 +79,23 @@ export async function getDebtSummary(): Promise<DebtSummaryDTO> {
     .eq('user_id', userId);
 
   if (error) {
+    if (error.code === '42P01' || error.message.includes('Could not find the table')) {
+      return {
+        total_lent_poisha_str: '0',
+        total_lent_bdt: '৳ 0.00',
+        total_lent_repaid_bdt: '৳ 0.00',
+        total_lent_remaining_bdt: '৳ 0.00',
+        total_borrowed_poisha_str: '0',
+        total_borrowed_bdt: '৳ 0.00',
+        total_borrowed_repaid_bdt: '৳ 0.00',
+        total_borrowed_remaining_bdt: '৳ 0.00',
+        net_balance_poisha_str: '0',
+        net_balance_bdt: '৳ 0.00',
+        active_lent_count: 0,
+        active_borrowed_count: 0,
+        settled_count: 0,
+      };
+    }
     throw new Error(`Failed to calculate debt summary: ${error.message}`);
   }
 

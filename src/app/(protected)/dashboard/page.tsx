@@ -1,24 +1,38 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getMonthlyReport, MonthlyReportDTO } from '@/lib/services/reports';
-import { ArrowUpRight, ArrowDownRight, Wallet, PiggyBank, RefreshCw } from 'lucide-react';
+import Link from 'next/link';
+import { getMonthlyReport, type MonthlyReportDTO } from '@/lib/services/reports';
+import { getDebtSummary } from '@/lib/services/debts';
+import type { DebtSummaryDTO } from '@/types/debt.types';
+import {
+  ArrowUpRight,
+  ArrowDownRight,
+  ArrowDownLeft,
+  Wallet,
+  PiggyBank,
+  RefreshCw,
+  HandCoins,
+  ChevronRight,
+} from 'lucide-react';
 
 export default function DashboardPage() {
   const [report, setReport] = useState<MonthlyReportDTO | null>(null);
+  const [debtSummary, setDebtSummary] = useState<DebtSummaryDTO | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  
+
   const now = new Date();
   const [selectedYear] = useState(now.getFullYear());
   const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
 
-  const loadReport = (year: number, month: number) => {
+  const loadData = (year: number, month: number) => {
     setIsLoading(true);
     setErrorMsg(null);
-    getMonthlyReport(year, month)
-      .then((data) => {
-        setReport(data);
+    Promise.all([getMonthlyReport(year, month), getDebtSummary().catch(() => null)])
+      .then(([reportData, debtsData]) => {
+        setReport(reportData);
+        setDebtSummary(debtsData);
         setIsLoading(false);
       })
       .catch((err: unknown) => {
@@ -28,7 +42,7 @@ export default function DashboardPage() {
   };
 
   useEffect(() => {
-    loadReport(selectedYear, selectedMonth);
+    loadData(selectedYear, selectedMonth);
   }, [selectedYear, selectedMonth]);
 
   const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
@@ -51,7 +65,7 @@ export default function DashboardPage() {
         <p className="text-sm font-semibold text-rose-400">{errorMsg}</p>
         <button
           type="button"
-          onClick={() => loadReport(selectedYear, selectedMonth)}
+          onClick={() => loadData(selectedYear, selectedMonth)}
           className="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-semibold hover:bg-rose-500 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
         >
           <RefreshCw className="w-3.5 h-3.5" /> Retry
@@ -153,6 +167,55 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Lend & Borrow Quick Status Widget */}
+      {debtSummary && (
+        <Link
+          href="/debts"
+          className="p-4 sm:p-5 rounded-2xl bg-slate-900/90 border border-slate-800/80 hover:border-slate-700 transition-all shadow-lg flex flex-col sm:flex-row sm:items-center justify-between gap-4 group cursor-pointer"
+        >
+          <div className="flex items-center gap-3">
+            <div className="p-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
+              <HandCoins className="w-5 h-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h2 className="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider">
+                  Lend & Borrow Overview
+                </h2>
+                <span className="text-[10px] font-bold text-emerald-400 px-2 py-0.5 rounded-md bg-emerald-500/10">
+                  Active
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-400 mt-0.5">
+                Track money lent, borrowed debts, and settlement progress
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 sm:gap-6 justify-between sm:justify-end border-t sm:border-t-0 border-slate-800/80 pt-3 sm:pt-0">
+            <div>
+              <span className="text-[10px] text-slate-500 font-semibold block uppercase">Owed to you</span>
+              <span className="text-xs sm:text-sm font-bold text-emerald-400 flex items-center gap-0.5">
+                <ArrowUpRight className="w-3 h-3" />
+                {debtSummary.total_lent_remaining_bdt}
+              </span>
+            </div>
+
+            <div>
+              <span className="text-[10px] text-slate-500 font-semibold block uppercase">You owe</span>
+              <span className="text-xs sm:text-sm font-bold text-rose-400 flex items-center gap-0.5">
+                <ArrowDownLeft className="w-3 h-3" />
+                {debtSummary.total_borrowed_remaining_bdt}
+              </span>
+            </div>
+
+            <div className="flex items-center text-slate-400 group-hover:text-slate-200 transition-colors">
+              <ChevronRight className="w-5 h-5" />
+            </div>
+          </div>
+        </Link>
+      )}
 
       {/* Allocation Targets Progress */}
       <div className="p-4 sm:p-6 rounded-2xl bg-slate-900/90 border border-slate-800/80 space-y-4 sm:space-y-5 shadow-lg">

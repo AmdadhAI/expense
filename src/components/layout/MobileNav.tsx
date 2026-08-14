@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, ReceiptText, Calendar, Settings } from 'lucide-react';
+import { LayoutDashboard, ReceiptText, HandCoins, Settings } from 'lucide-react';
 import { AddTransactionButton } from '@/components/ui/AddTransactionButton';
 
 interface MobileNavProps {
@@ -18,7 +18,7 @@ export function MobileNav({ onAddTransaction }: MobileNavProps) {
   ];
 
   const rightNavItems = [
-    { label: 'Yearly', href: '/review/yearly', icon: Calendar },
+    { label: 'Debts', href: '/debts', icon: HandCoins },
     { label: 'Settings', href: '/settings', icon: Settings },
   ];
 

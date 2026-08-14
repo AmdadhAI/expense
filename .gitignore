@@ -28,3 +28,7 @@ supabase/.branches/
 # OS
 .DS_Store
 Thumbs.db
+
+# Misc
+hack/
+*.tsbuildinfo

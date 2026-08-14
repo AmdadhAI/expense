@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LayoutDashboard, ReceiptText, Calendar, Settings, Plus } from 'lucide-react';
+import { LayoutDashboard, ReceiptText, HandCoins, Calendar, Settings, Plus } from 'lucide-react';
 
 interface DesktopSidebarProps {
   onAddTransaction?: () => void;
@@ -14,6 +14,7 @@ export function DesktopSidebar({ onAddTransaction }: DesktopSidebarProps) {
   const navItems = [
     { label: 'Dashboard', href: '/dashboard', icon: LayoutDashboard },
     { label: 'Transactions', href: '/transactions', icon: ReceiptText },
+    { label: 'Lend & Borrow', href: '/debts', icon: HandCoins },
     { label: 'Yearly Review', href: '/review/yearly', icon: Calendar },
     { label: 'Settings', href: '/settings', icon: Settings },
   ];

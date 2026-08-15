@@ -189,7 +189,7 @@ export async function createDebt(input: CreateDebtInput): Promise<DebtDTO> {
     .single();
 
   if (error || !data) {
-    throw new Error(`Failed to create debt record: ${error?.message}`);
+    handleDatabaseError(error, 'Failed to create debt record');
   }
 
   return formatDebtDTO(data);
@@ -229,7 +229,7 @@ export async function updateDebt(input: UpdateDebtInput): Promise<DebtDTO> {
     .single();
 
   if (error || !data) {
-    throw new Error(`Failed to update debt record: ${error?.message}`);
+    handleDatabaseError(error, 'Failed to update debt record');
   }
 
   return formatDebtDTO(data);
@@ -246,7 +246,7 @@ export async function deleteDebt(id: string): Promise<void> {
   const { error } = await supabase.from('debts').delete().eq('id', id).eq('user_id', userId);
 
   if (error) {
-    throw new Error(`Failed to delete debt record: ${error.message}`);
+    handleDatabaseError(error, 'Failed to delete debt record');
   }
 }
 
@@ -271,7 +271,7 @@ export async function recordDebtPayment(input: CreateDebtPaymentInput): Promise<
     .single();
 
   if (debtError || !debt) {
-    throw new Error('Debt record not found');
+    handleDatabaseError(debtError, 'Debt record not found');
   }
 
   const paymentPoisha = parseDecimalToPoisha(validated.amount_decimal);
@@ -305,7 +305,7 @@ export async function recordDebtPayment(input: CreateDebtPaymentInput): Promise<
     .single();
 
   if (insertError || !payment) {
-    throw new Error(`Failed to record payment: ${insertError?.message}`);
+    handleDatabaseError(insertError, 'Failed to record payment');
   }
 
   // 3. Auto-update status to 'settled' if remaining balance becomes 0
@@ -348,7 +348,7 @@ export async function deleteDebtPayment(paymentId: string): Promise<void> {
     .single();
 
   if (fetchError || !payment) {
-    throw new Error('Payment record not found');
+    handleDatabaseError(fetchError, 'Payment record not found');
   }
 
   // 2. Delete payment
@@ -359,7 +359,7 @@ export async function deleteDebtPayment(paymentId: string): Promise<void> {
     .eq('user_id', userId);
 
   if (deleteError) {
-    throw new Error(`Failed to delete payment: ${deleteError.message}`);
+    handleDatabaseError(deleteError, 'Failed to delete payment');
   }
 
   // 3. Check remaining balance and re-open debt to 'active' if needed
@@ -459,4 +459,19 @@ function formatDebtDTO(row: {
     updated_at: row.updated_at,
     payments,
   };
+}
+
+function handleDatabaseError(error: { code?: string; message?: string } | null, defaultMsg: string): never {
+  const msg = error?.message || '';
+  if (
+    error?.code === '42P01' ||
+    msg.includes('Could not find the table') ||
+    msg.includes('relation "public.debts" does not exist') ||
+    msg.includes('relation "public.debt_payments" does not exist')
+  ) {
+    throw new Error(
+      'The "debts" table has not been initialized in your Supabase database yet. Please run the SQL migration in your Supabase SQL Editor.'
+    );
+  }
+  throw new Error(`${defaultMsg}: ${msg || 'Unknown error'}`);
 }

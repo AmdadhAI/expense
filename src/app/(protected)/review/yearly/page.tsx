@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getYearlyReport, YearlyReportDTO } from '@/lib/services/reports';
+import { getYearlyReport, type YearlyReportDTO } from '@/lib/services/reports';
 import { Trophy, TrendingUp, RefreshCw } from 'lucide-react';
 
 export default function YearlyReviewPage() {

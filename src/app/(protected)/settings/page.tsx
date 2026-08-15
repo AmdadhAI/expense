@@ -9,9 +9,9 @@ import {
   createCategory,
   updateCategory,
   archiveCategory,
-  CategoryDTO,
+  type CategoryDTO,
 } from '@/lib/services/categories';
-import { TransactionKind } from '@/types/database.types';
+import type { TransactionKind } from '@/types/database.types';
 import { LogOut, Save, CheckCircle2, AlertCircle, Plus, Pencil, Archive, KeyRound, ShieldCheck } from 'lucide-react';
 
 export default function SettingsPage() {

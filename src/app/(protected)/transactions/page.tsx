@@ -2,12 +2,12 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { listTransactionsByMonth, deleteTransaction, TransactionDTO } from '@/lib/services/transactions';
-import { listCategories, CategoryDTO } from '@/lib/services/categories';
+import { listTransactionsByMonth, deleteTransaction, type TransactionDTO } from '@/lib/services/transactions';
+import { listCategories, type CategoryDTO } from '@/lib/services/categories';
 import { TransactionFormModal } from '@/components/transactions/TransactionFormModal';
 import { createTransaction, updateTransaction } from '@/lib/services/transactions';
 import { Search, Pencil, Trash2, X } from 'lucide-react';
-import { TransactionKind } from '@/types/database.types';
+import type { TransactionKind } from '@/types/database.types';
 
 export default function TransactionsPage() {
   const now = new Date();

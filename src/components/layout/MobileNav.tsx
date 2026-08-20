@@ -18,7 +18,7 @@ export function MobileNav({ onAddTransaction }: MobileNavProps) {
   ];
 
   const rightNavItems = [
-    { label: 'Debts', href: '/debts', icon: HandCoins },
+    { label: 'দেনা-পাওনা', href: '/debts', icon: HandCoins },
     { label: 'Settings', href: '/settings', icon: Settings },
   ];
 

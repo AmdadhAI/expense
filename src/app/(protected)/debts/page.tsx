@@ -1,434 +1,374 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { useRouter } from 'next/navigation';
-import {
-  listDebts,
-  getDebtSummary,
-  createDebt,
-  updateDebt,
-  deleteDebt,
-  recordDebtPayment,
-  deleteDebtPayment,
-} from '@/lib/services/debts';
-import type { DebtDTO, DebtSummaryDTO, DebtType, DebtStatus } from '@/types/debt.types';
-import { DebtFormModal } from '@/components/debts/DebtFormModal';
-import { DebtPaymentModal } from '@/components/debts/DebtPaymentModal';
 import {
   HandCoins,
   Plus,
+  Search,
   ArrowUpRight,
   ArrowDownLeft,
-  Calendar,
-  Pencil,
-  Trash2,
-  Coins,
-  Search,
-  CheckCircle2,
-  Clock,
+  Scale,
   RefreshCw,
+  Clock,
+  ChevronRight,
+  FileText,
+  UserCheck,
 } from 'lucide-react';
+import {
+  listDebtContacts,
+  getDebtSummary,
+  createDebtEntry,
+  listAllContacts,
+} from '@/lib/services/debts';
+import type { DebtContactDTO, DebtSummaryDTO, DebtEntryType } from '@/types/debt.types';
+import { DebtFormModal } from '@/components/debts/DebtFormModal';
+import { PersonLedgerModal } from '@/components/debts/PersonLedgerModal';
 
 export default function DebtsPage() {
-  const router = useRouter();
-
-  const [debts, setDebts] = useState<DebtDTO[]>([]);
+  const [contacts, setContacts] = useState<DebtContactDTO[]>([]);
+  const [allContactsList, setAllContactsList] = useState<Array<{ id: string; name: string }>>([]);
   const [summary, setSummary] = useState<DebtSummaryDTO | null>(null);
+  const [statusFilter, setStatusFilter] = useState<'all' | 'paona' | 'dena' | 'settled'>('all');
+  const [searchQuery, setSearchQuery] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  // Filters
-  const [selectedType, setSelectedType] = useState<DebtType | 'all'>('all');
-  const [selectedStatus, setSelectedStatus] = useState<DebtStatus | 'all'>('all');
-  const [searchQuery, setSearchQuery] = useState('');
+  // Modals state
+  const [isAddEntryOpen, setIsAddEntryOpen] = useState(false);
+  const [selectedContactForEntry, setSelectedContactForEntry] = useState<string | null>(null);
+  const [defaultEntryType, setDefaultEntryType] = useState<DebtEntryType | undefined>(undefined);
 
-  // Modals
-  const [isFormOpen, setIsFormOpen] = useState(false);
-  const [editingDebt, setEditingDebt] = useState<DebtDTO | null>(null);
+  const [ledgerContactId, setLedgerContactId] = useState<string | null>(null);
+  const [isLedgerOpen, setIsLedgerOpen] = useState(false);
 
-  const [isPaymentOpen, setIsPaymentOpen] = useState(false);
-  const [payingDebt, setPayingDebt] = useState<DebtDTO | null>(null);
-
-  // Delete modal
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-
-  const loadData = useCallback(() => {
+  const fetchData = useCallback(async () => {
     setIsLoading(true);
     setErrorMsg(null);
-
-    Promise.all([
-      listDebts({
-        type: selectedType,
-        status: selectedStatus,
-        searchQuery: searchQuery.trim(),
-      }),
-      getDebtSummary(),
-    ])
-      .then(([debtsData, summaryData]) => {
-        setDebts(debtsData);
-        setSummary(summaryData);
-        setIsLoading(false);
-      })
-      .catch((err: unknown) => {
-        setErrorMsg((err as Error).message || 'Failed to load debt records');
-        setIsLoading(false);
-      });
-  }, [selectedType, selectedStatus, searchQuery]);
+    try {
+      const [contactsData, summaryData, allContacts] = await Promise.all([
+        listDebtContacts({
+          status: statusFilter,
+          searchQuery,
+        }),
+        getDebtSummary(),
+        listAllContacts(),
+      ]);
+      setContacts(contactsData);
+      setSummary(summaryData);
+      setAllContactsList(allContacts);
+    } catch (err: unknown) {
+      setErrorMsg((err as Error).message || 'Failed to load Dena-Paona records');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [statusFilter, searchQuery]);
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    fetchData();
+  }, [fetchData]);
 
-  const handleDelete = async (id: string) => {
-    try {
-      await deleteDebt(id);
-      setDeletingId(null);
-      loadData();
-      router.refresh();
-    } catch (err: unknown) {
-      alert((err as Error).message || 'Failed to delete record');
-    }
-  };
+  function handleOpenAddEntry(contactId?: string | null, type?: DebtEntryType) {
+    setSelectedContactForEntry(contactId || null);
+    setDefaultEntryType(type);
+    setIsAddEntryOpen(true);
+  }
 
-  const handleOpenAdd = () => {
-    setEditingDebt(null);
-    setIsFormOpen(true);
-  };
-
-  const handleOpenEdit = (debt: DebtDTO) => {
-    setEditingDebt(debt);
-    setIsFormOpen(true);
-  };
-
-  const handleOpenPayment = (debt: DebtDTO) => {
-    setPayingDebt(debt);
-    setIsPaymentOpen(true);
-  };
-
-  const handleSuccess = () => {
-    loadData();
-    router.refresh();
-  };
-
-  const isNetNegative = summary && BigInt(summary.net_balance_poisha_str) < 0n;
+  function handleOpenLedger(contactId: string) {
+    setLedgerContactId(contactId);
+    setIsLedgerOpen(true);
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 pb-24 md:pb-12 max-w-7xl mx-auto animate-in fade-in duration-200">
       {/* Header */}
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-xl sm:text-2xl font-bold text-slate-100 tracking-tight flex items-center gap-2.5">
-            <HandCoins className="w-6 h-6 text-emerald-400" />
-            Lend & Borrow
-          </h1>
-          <p className="text-xs sm:text-sm text-slate-400">
-            Monitor money lent to others, debts owed, and repayments
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-100 tracking-tight flex items-center gap-2.5">
+              <span className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 inline-flex">
+                <HandCoins className="w-6 h-6" />
+              </span>
+              দেনা - পাওনা (Dena - Paona)
+            </h1>
+          </div>
+          <p className="text-xs text-slate-400 mt-1">
+            ব্যক্তিভিত্তিক ধারের খতিয়ান, দেনা-পাওনা ও পরিশোধের হিসাব
           </p>
         </div>
 
-        <button
-          type="button"
-          onClick={handleOpenAdd}
-          className="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-slate-950 font-bold text-xs transition-all shadow-[0_0_12px_rgba(16,185,129,0.25)] flex items-center justify-center gap-1.5 cursor-pointer shrink-0 active:scale-95"
-        >
-          <Plus className="w-4 h-4 stroke-[3]" />
-          <span>Add Loan / Debt</span>
-        </button>
-      </header>
-
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
-        {/* You are Owed (Lent) */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-slate-900/90 border border-slate-800/80 shadow-lg flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] sm:text-xs font-bold text-emerald-400 uppercase tracking-wider">
-              You are Owed (Lent)
-            </span>
-            <div className="p-1.5 sm:p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400">
-              <ArrowUpRight className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <p className="text-xl sm:text-2xl font-bold text-slate-100 tracking-tight">
-              {summary?.total_lent_remaining_bdt || '৳ 0.00'}
-            </p>
-            <div className="flex items-center justify-between text-[11px] text-slate-400 mt-1">
-              <span>{summary?.active_lent_count || 0} active lent record{summary?.active_lent_count === 1 ? '' : 's'}</span>
-              <span>Total: {summary?.total_lent_bdt || '৳ 0.00'}</span>
-            </div>
-          </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => fetchData()}
+            title="Refresh records"
+            className="p-2.5 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-slate-200 hover:border-slate-700 transition-all cursor-pointer"
+          >
+            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+          </button>
+          <button
+            type="button"
+            onClick={() => handleOpenAddEntry()}
+            className="px-4 py-2.5 rounded-xl bg-emerald-600 text-slate-950 font-bold text-xs hover:bg-emerald-500 transition-all cursor-pointer flex items-center gap-1.5 shadow-[0_0_16px_rgba(16,185,129,0.25)] active:scale-[0.99]"
+          >
+            <Plus className="w-4 h-4 stroke-[3]" />
+            নতুন লেনদেন (Add Entry)
+          </button>
         </div>
+      </div>
 
-        {/* You Owe (Borrowed) */}
-        <div className="p-4 sm:p-5 rounded-2xl bg-slate-900/90 border border-slate-800/80 shadow-lg flex flex-col justify-between">
-          <div className="flex items-center justify-between">
-            <span className="text-[10px] sm:text-xs font-bold text-rose-400 uppercase tracking-wider">
-              You Owe (Borrowed)
-            </span>
-            <div className="p-1.5 sm:p-2 rounded-xl bg-rose-500/10 border border-rose-500/20 text-rose-400">
-              <ArrowDownLeft className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <p className="text-xl sm:text-2xl font-bold text-slate-100 tracking-tight">
-              {summary?.total_borrowed_remaining_bdt || '৳ 0.00'}
-            </p>
-            <div className="flex items-center justify-between text-[11px] text-slate-400 mt-1">
-              <span>{summary?.active_borrowed_count || 0} active debt{summary?.active_borrowed_count === 1 ? '' : 's'}</span>
-              <span>Total: {summary?.total_borrowed_bdt || '৳ 0.00'}</span>
-            </div>
-          </div>
+      {errorMsg && (
+        <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 text-xs font-semibold text-rose-400">
+          {errorMsg}
         </div>
+      )}
 
-        {/* Net Standing */}
-        <div className={`p-4 sm:p-5 rounded-2xl bg-slate-900/90 border shadow-lg flex flex-col justify-between ${
-          isNetNegative ? 'border-rose-500/40 bg-rose-950/20' : 'border-slate-800/80'
-        }`}>
+      {/* Summary KPI Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* Total Paona (Receivable) */}
+        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800/80 hover:border-emerald-500/30 transition-all">
           <div className="flex items-center justify-between">
-            <span className={`text-[10px] sm:text-xs font-bold uppercase tracking-wider ${
-              isNetNegative ? 'text-rose-400' : 'text-sky-400'
-            }`}>
-              Net Balance Position
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              মোট পাওনা (You will receive)
             </span>
-            <div className={`p-1.5 sm:p-2 rounded-xl border ${
-              isNetNegative ? 'bg-rose-500/10 text-rose-400 border-rose-500/20' : 'bg-sky-500/10 text-sky-400 border-sky-500/20'
-            }`}>
-              <Coins className="w-4 h-4" />
+            <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
+              <ArrowUpRight className="w-4 h-4 stroke-[2.5]" />
             </div>
           </div>
           <div className="mt-3">
-            <p className={`text-xl sm:text-2xl font-bold tracking-tight ${
-              isNetNegative ? 'text-rose-400' : 'text-slate-100'
-            }`}>
-              {summary?.net_balance_bdt || '৳ 0.00'}
-            </p>
+            <div className="text-2xl sm:text-3xl font-extrabold text-emerald-400 tracking-tight">
+              {summary ? summary.total_paona_bdt : '৳ 0.00'}
+            </div>
             <p className="text-[11px] text-slate-400 mt-1">
-              {isNetNegative ? 'You owe more than you are owed' : 'You are owed more than you owe'}
+              {summary ? `${summary.paona_contacts_count} জনের কাছে পাওনা বাকি` : '০ জনের কাছে পাওনা'}
+            </p>
+          </div>
+        </div>
+
+        {/* Total Dena (Payable) */}
+        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800/80 hover:border-rose-500/30 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              মোট দেনা (You will pay)
+            </span>
+            <div className="p-2 rounded-xl bg-rose-500/10 text-rose-400 border border-rose-500/20">
+              <ArrowDownLeft className="w-4 h-4 stroke-[2.5]" />
+            </div>
+          </div>
+          <div className="mt-3">
+            <div className="text-2xl sm:text-3xl font-extrabold text-rose-400 tracking-tight">
+              {summary ? summary.total_dena_bdt : '৳ 0.00'}
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">
+              {summary ? `${summary.dena_contacts_count} জনকে পরিশোধ করতে হবে` : '০ জনের দেনা'}
+            </p>
+          </div>
+        </div>
+
+        {/* Net Position */}
+        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800/80 hover:border-sky-500/30 transition-all">
+          <div className="flex items-center justify-between">
+            <span className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+              নেট ব্যালেন্স (Net Position)
+            </span>
+            <div className="p-2 rounded-xl bg-sky-500/10 text-sky-400 border border-sky-500/20">
+              <Scale className="w-4 h-4" />
+            </div>
+          </div>
+          <div className="mt-3">
+            <div
+              className={`text-2xl sm:text-3xl font-extrabold tracking-tight ${
+                summary && BigInt(summary.net_balance_poisha_str) > 0n
+                  ? 'text-emerald-400'
+                  : summary && BigInt(summary.net_balance_poisha_str) < 0n
+                  ? 'text-rose-400'
+                  : 'text-slate-100'
+              }`}
+            >
+              {summary ? summary.net_balance_bdt : '৳ 0.00'}
+            </div>
+            <p className="text-[11px] text-slate-400 mt-1">
+              {summary && BigInt(summary.net_balance_poisha_str) > 0n
+                ? 'পাওনার পরিমাণ দেনার চেয়ে বেশি (+)'
+                : summary && BigInt(summary.net_balance_poisha_str) < 0n
+                ? 'দেনার পরিমাণ পাওনার চেয়ে বেশি (-)'
+                : 'দেনা ও পাওনা সম্পূর্ণ সমান (৳০)'}
             </p>
           </div>
         </div>
       </div>
 
-      {/* Filter Controls Bar */}
-      <div className="p-4 rounded-2xl bg-slate-900/90 border border-slate-800/80 space-y-3 shadow-lg">
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          {/* Type Filter */}
-          <div>
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-              Direction
-            </label>
-            <select
-              value={selectedType}
-              onChange={(e) => setSelectedType(e.target.value as DebtType | 'all')}
-              className="w-full px-3 py-2 rounded-xl border border-slate-800 text-xs font-semibold bg-slate-950 text-slate-200 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer"
-            >
-              <option value="all">All Directions</option>
-              <option value="lent">Lent (They owe me)</option>
-              <option value="borrowed">Borrowed (I owe them)</option>
-            </select>
-          </div>
+      {/* Filters & Search Toolbar */}
+      <div className="p-4 rounded-2xl bg-slate-900 border border-slate-800 flex flex-col md:flex-row items-center justify-between gap-3">
+        {/* Search */}
+        <div className="relative w-full md:w-72">
+          <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" />
+          <input
+            type="text"
+            placeholder="ব্যক্তির নাম দিয়ে খুঁজুন..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="w-full pl-9 pr-4 py-2 rounded-xl bg-slate-950 border border-slate-800 text-xs font-semibold text-slate-100 placeholder:text-slate-600 focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500"
+          />
+        </div>
 
-          {/* Status Filter */}
-          <div>
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-              Status
-            </label>
-            <select
-              value={selectedStatus}
-              onChange={(e) => setSelectedStatus(e.target.value as DebtStatus | 'all')}
-              className="w-full px-3 py-2 rounded-xl border border-slate-800 text-xs font-semibold bg-slate-950 text-slate-200 focus:ring-2 focus:ring-emerald-500/20 cursor-pointer"
-            >
-              <option value="all">All Statuses</option>
-              <option value="active">Active Only</option>
-              <option value="settled">Settled Only</option>
-            </select>
-          </div>
-
-          {/* Search */}
-          <div>
-            <label className="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">
-              Search Person
-            </label>
-            <div className="relative flex items-center">
-              <Search className="w-3.5 h-3.5 absolute left-3 text-slate-500 pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Name..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full !pl-8 pr-3 py-2 rounded-xl border border-slate-800 text-xs font-semibold focus:ring-2 focus:ring-emerald-500/20 bg-slate-950 text-slate-100 placeholder:text-slate-500"
-              />
-            </div>
-          </div>
+        {/* Status Filter Tabs */}
+        <div className="flex items-center gap-1.5 w-full md:w-auto overflow-x-auto pb-1 md:pb-0">
+          <button
+            type="button"
+            onClick={() => setStatusFilter('all')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
+              statusFilter === 'all'
+                ? 'bg-slate-800 text-slate-100 border border-slate-700'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            সব হিসাব
+          </button>
+          <button
+            type="button"
+            onClick={() => setStatusFilter('paona')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1 ${
+              statusFilter === 'paona'
+                ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                : 'text-slate-400 hover:text-emerald-400'
+            }`}
+          >
+            পাওনাদার
+          </button>
+          <button
+            type="button"
+            onClick={() => setStatusFilter('dena')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 flex items-center gap-1 ${
+              statusFilter === 'dena'
+                ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30'
+                : 'text-slate-400 hover:text-rose-400'
+            }`}
+          >
+            দেনাদার
+          </button>
+          <button
+            type="button"
+            onClick={() => setStatusFilter('settled')}
+            className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer shrink-0 ${
+              statusFilter === 'settled'
+                ? 'bg-slate-800 text-slate-200 border border-slate-700'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            সমান হিসাব (৳0)
+          </button>
         </div>
       </div>
 
-      {/* Main Records List */}
-      <div className="p-4 sm:p-6 rounded-2xl bg-slate-900/90 border border-slate-800/80 space-y-4 shadow-lg">
-        <div className="flex items-center justify-between border-b border-slate-800/80 pb-3">
-          <h2 className="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider">
-            Loan & Debt Records ({debts.length})
+      {/* Person Accounts Grid */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between px-1">
+          <h2 className="text-xs font-bold uppercase tracking-wider text-slate-400 flex items-center gap-2">
+            <UserCheck className="w-3.5 h-3.5 text-emerald-400" />
+            ব্যক্তিদের তালিকা ({contacts.length})
           </h2>
+          <span className="text-[11px] text-slate-500">কার্ডে ক্লিক করে বিস্তারিত খতিয়ান দেখুন</span>
         </div>
 
-        {isLoading ? (
-          <div className="py-12 text-center space-y-3">
-            <div className="inline-block animate-spin rounded-full h-6 w-6 border-2 border-emerald-500 border-t-transparent"></div>
-            <p className="text-xs text-slate-500">Loading records...</p>
-          </div>
-        ) : errorMsg ? (
-          <div className="p-6 rounded-2xl bg-rose-500/10 border border-rose-500/20 space-y-3 text-center">
-            <p className="text-sm font-semibold text-rose-400">{errorMsg}</p>
-            <button
-              onClick={loadData}
-              className="px-4 py-2 bg-rose-600 text-white rounded-xl text-xs font-semibold hover:bg-rose-500 transition-colors inline-flex items-center gap-1.5 cursor-pointer"
-            >
-              <RefreshCw className="w-3.5 h-3.5" /> Retry
-            </button>
-          </div>
-        ) : debts.length === 0 ? (
-          <div className="py-12 text-center space-y-3">
-            <div className="inline-flex items-center justify-center p-3 rounded-full bg-slate-800/60 text-slate-400">
-              <HandCoins className="w-8 h-8" />
-            </div>
-            <p className="text-sm font-semibold text-slate-300">No loan or debt records found.</p>
-            <p className="text-xs text-slate-500 max-w-sm mx-auto">
-              Start by tapping "+ Add Loan / Debt" above to record money you lent or borrowed.
+        {contacts.length === 0 ? (
+          <div className="p-12 rounded-3xl bg-slate-900 border border-slate-800 text-center">
+            <FileText className="w-10 h-10 text-slate-600 mx-auto mb-3" />
+            <h3 className="text-sm font-bold text-slate-300">কোন হিসাব পাওয়া যায়নি</h3>
+            <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
+              নতুন কোন ব্যক্তির সাথে দেনা বা পাওনার হিসাব শুরু করতে উপরের &quot;নতুন লেনদেন&quot; বাটনে চাপ দিন।
             </p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {debts.map((item) => {
-              const isLent = item.type === 'lent';
-              const isSettled = item.status === 'settled';
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {contacts.map((c) => {
+              const isPaona = c.status === 'paona';
+              const isDena = c.status === 'dena';
 
               return (
                 <div
-                  key={item.id}
-                  className={`p-4 sm:p-5 rounded-2xl border transition-all shadow-md flex flex-col justify-between space-y-4 ${
-                    isSettled
-                      ? 'bg-slate-950/60 border-slate-800/60 opacity-80'
-                      : 'bg-slate-950 border-slate-800'
-                  }`}
+                  key={c.id}
+                  className="p-5 rounded-2xl bg-slate-900 border border-slate-800/90 hover:border-slate-700 transition-all flex flex-col justify-between gap-4 group"
                 >
-                  {/* Top Details */}
-                  <div className="space-y-3">
-                    <div className="flex items-start justify-between gap-2">
+                  {/* Card Top */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-11 h-11 rounded-2xl flex items-center justify-center font-extrabold text-base border ${
+                          isPaona
+                            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                            : isDena
+                            ? 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+                            : 'bg-slate-800 border-slate-700 text-slate-400'
+                        }`}
+                      >
+                        {c.name.charAt(0).toUpperCase()}
+                      </div>
                       <div>
-                        <h3 className="font-bold text-slate-100 text-base flex items-center gap-2">
-                          {item.person_name}
+                        <h3 className="text-base font-bold text-slate-100 group-hover:text-emerald-400 transition-colors">
+                          {c.name}
                         </h3>
-                        <div className="flex items-center gap-2 mt-1 flex-wrap">
-                          <span
-                            className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider inline-flex items-center gap-1 ${
-                              isLent
-                                ? 'bg-emerald-500/10 text-emerald-400 border border-emerald-500/20'
-                                : 'bg-rose-500/10 text-rose-400 border border-rose-500/20'
-                            }`}
-                          >
-                            {isLent ? <ArrowUpRight className="w-3 h-3" /> : <ArrowDownLeft className="w-3 h-3" />}
-                            {isLent ? 'Lent (They Owe)' : 'Borrowed (You Owe)'}
-                          </span>
-
-                          <span
-                            className={`px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider inline-flex items-center gap-1 ${
-                              isSettled
-                                ? 'bg-slate-800 text-slate-300'
-                                : 'bg-sky-500/10 text-sky-400 border border-sky-500/20'
-                            }`}
-                          >
-                            {isSettled ? <CheckCircle2 className="w-3 h-3 text-emerald-400" /> : <Clock className="w-3 h-3" />}
-                            {isSettled ? 'Settled' : 'Active'}
-                          </span>
+                        <div className="flex items-center gap-2 text-[11px] text-slate-400 mt-0.5">
+                          <span>{c.entries_count} টি লেনদেন</span>
+                          {c.last_activity_date && (
+                            <>
+                              <span>•</span>
+                              <span className="flex items-center gap-1">
+                                <Clock className="w-3 h-3 text-slate-500" />
+                                {c.last_activity_date}
+                              </span>
+                            </>
+                          )}
                         </div>
                       </div>
-
-                      <div className="text-right">
-                        <span className="text-[10px] text-slate-500 font-semibold block uppercase tracking-wider">
-                          Remaining
-                        </span>
-                        <span className={`text-base sm:text-lg font-bold tracking-tight ${
-                          isSettled ? 'text-slate-400 line-through' : isLent ? 'text-emerald-400' : 'text-rose-400'
-                        }`}>
-                          {item.remaining_amount_bdt}
-                        </span>
-                      </div>
                     </div>
 
-                    {/* Progress Bar & Amounts */}
-                    <div className="space-y-1.5 pt-1">
-                      <div className="flex justify-between text-[11px] font-semibold text-slate-400">
-                        <span>Repaid: {item.repaid_amount_bdt}</span>
-                        <span>Total: {item.total_amount_bdt}</span>
-                      </div>
-                      <div className="w-full h-2 bg-slate-900 rounded-full overflow-hidden border border-slate-800/80">
-                        <div
-                          className={`h-full rounded-full transition-all duration-300 ${
-                            isSettled
-                              ? 'bg-slate-500'
-                              : isLent
-                              ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]'
-                              : 'bg-rose-500 shadow-[0_0_8px_rgba(244,63,94,0.4)]'
-                          }`}
-                          style={{ width: `${item.repaid_percent}%` }}
-                        ></div>
-                      </div>
-                    </div>
-
-                    {/* Due Date & Notes */}
-                    <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1">
-                      {item.due_date ? (
-                        <span className="flex items-center gap-1">
-                          <Calendar className="w-3 h-3 text-slate-400" />
-                          Due: {item.due_date}
-                        </span>
-                      ) : (
-                        <span>No due date</span>
-                      )}
-                      <span>{item.payments.length} payment{item.payments.length === 1 ? '' : 's'}</span>
-                    </div>
-
-                    {item.notes && (
-                      <p className="text-xs text-slate-400 italic bg-slate-900/60 p-2 rounded-lg border border-slate-850">
-                        "{item.notes}"
-                      </p>
-                    )}
-                  </div>
-
-                  {/* Actions Bar */}
-                  <div className="flex items-center justify-between pt-3 border-t border-slate-800/80">
-                    <button
-                      type="button"
-                      onClick={() => handleOpenPayment(item)}
-                      className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all flex items-center gap-1 cursor-pointer ${
-                        isSettled
-                          ? 'bg-slate-800 text-slate-300 hover:bg-slate-700'
-                          : 'bg-emerald-600 text-slate-950 hover:bg-emerald-500 shadow-xs'
+                    {/* Status Badge */}
+                    <span
+                      className={`text-[11px] font-extrabold px-2.5 py-1 rounded-full border ${
+                        isPaona
+                          ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400'
+                          : isDena
+                          ? 'bg-rose-500/10 border-rose-500/20 text-rose-400'
+                          : 'bg-slate-800 border-slate-700 text-slate-400'
                       }`}
                     >
-                      <Coins className="w-3.5 h-3.5" />
-                      <span>{isSettled ? 'View History' : 'Record Payment'}</span>
+                      {isPaona ? 'পাওনা' : isDena ? 'দেনা' : 'সমান (৳0)'}
+                    </span>
+                  </div>
+
+                  {/* Net Balance Details */}
+                  <div className="p-3 rounded-xl bg-slate-950/80 border border-slate-800/80 flex items-center justify-between">
+                    <span className="text-[11px] font-semibold text-slate-400">
+                      {isPaona ? 'বাকি পাওনা:' : isDena ? 'বাকি দেনা:' : 'মোট হিসাব:'}
+                    </span>
+                    <span
+                      className={`text-lg font-extrabold tracking-tight ${
+                        isPaona ? 'text-emerald-400' : isDena ? 'text-rose-400' : 'text-slate-300'
+                      }`}
+                    >
+                      {c.net_balance_bdt}
+                    </span>
+                  </div>
+
+                  {/* Card Actions */}
+                  <div className="flex items-center gap-2 pt-1 border-t border-slate-800/60">
+                    <button
+                      type="button"
+                      onClick={() => handleOpenLedger(c.id)}
+                      className="flex-1 py-2 px-3 rounded-xl bg-slate-800/70 hover:bg-slate-800 text-slate-200 text-xs font-bold transition-all cursor-pointer flex items-center justify-center gap-1.5"
+                    >
+                      <FileText className="w-3.5 h-3.5 text-slate-400" />
+                      হিসাব দেখুন
+                      <ChevronRight className="w-3.5 h-3.5 text-slate-500" />
                     </button>
-
-                    <div className="flex items-center gap-1">
-                      <button
-                        type="button"
-                        onClick={() => handleOpenEdit(item)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-slate-200 hover:bg-slate-800 transition-colors cursor-pointer"
-                        title="Edit Record"
-                      >
-                        <Pencil className="w-4 h-4" />
-                      </button>
-
-                      <button
-                        type="button"
-                        onClick={() => setDeletingId(item.id)}
-                        className="p-1.5 rounded-lg text-slate-400 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer"
-                        title="Delete Record"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleOpenAddEntry(c.id, isDena ? 'paid' : 'received')}
+                      className="py-2 px-3 rounded-xl bg-emerald-500/10 hover:bg-emerald-500/20 border border-emerald-500/20 text-emerald-400 text-xs font-bold transition-all cursor-pointer flex items-center gap-1"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      লেনদেন
+                    </button>
                   </div>
                 </div>
               );
@@ -437,59 +377,39 @@ export default function DebtsPage() {
         )}
       </div>
 
-      {/* Debt Add / Edit Modal */}
+      {/* Add / Edit Entry Modal */}
       <DebtFormModal
-        isOpen={isFormOpen}
+        isOpen={isAddEntryOpen}
         onClose={() => {
-          setIsFormOpen(false);
-          setEditingDebt(null);
+          setIsAddEntryOpen(false);
+          setSelectedContactForEntry(null);
+          setDefaultEntryType(undefined);
         }}
-        onSuccess={handleSuccess}
-        initialData={editingDebt}
-        createAction={createDebt}
-        updateAction={updateDebt}
+        onSuccess={() => {
+          fetchData();
+        }}
+        contacts={allContactsList}
+        preselectedContactId={selectedContactForEntry}
+        defaultEntryType={defaultEntryType}
+        createAction={createDebtEntry}
       />
 
-      {/* Debt Payment Modal */}
-      <DebtPaymentModal
-        isOpen={isPaymentOpen}
+      {/* Person Ledger Statement Modal */}
+      <PersonLedgerModal
+        isOpen={isLedgerOpen}
+        contactId={ledgerContactId}
         onClose={() => {
-          setIsPaymentOpen(false);
-          setPayingDebt(null);
+          setIsLedgerOpen(false);
+          setLedgerContactId(null);
         }}
-        onSuccess={handleSuccess}
-        debt={payingDebt}
-        recordPaymentAction={recordDebtPayment}
-        deletePaymentAction={deleteDebtPayment}
+        onOpenAddEntry={(cid, type) => {
+          setIsLedgerOpen(false);
+          handleOpenAddEntry(cid, type);
+        }}
+        onSuccess={() => {
+          fetchData();
+        }}
       />
-
-      {/* Delete Confirmation Modal */}
-      {deletingId && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-4 backdrop-blur-sm">
-          <div className="bg-slate-900 rounded-2xl p-6 max-w-sm w-full space-y-4 shadow-2xl border border-slate-800">
-            <h3 className="text-base font-bold text-slate-100">Delete Loan Record?</h3>
-            <p className="text-xs text-slate-400">
-              Are you sure you want to delete this debt/loan record and all its associated repayment history? This action cannot be undone.
-            </p>
-            <div className="flex justify-end gap-2 pt-2">
-              <button
-                type="button"
-                onClick={() => setDeletingId(null)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:bg-slate-800 cursor-pointer"
-              >
-                Cancel
-              </button>
-              <button
-                type="button"
-                onClick={() => handleDelete(deletingId)}
-                className="px-4 py-2 rounded-xl text-xs font-semibold bg-rose-600 text-white hover:bg-rose-500 cursor-pointer"
-              >
-                Confirm Delete
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 }

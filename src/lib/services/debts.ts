@@ -3,26 +3,22 @@
 import { createClient } from '@/lib/supabase/server';
 import { parseDecimalToPoisha, formatPoishaToDecimal, formatPoishaToBDT } from '@/lib/money';
 import {
-  createDebtSchema,
-  updateDebtSchema,
-  createDebtPaymentSchema,
-  CreateDebtInput,
-  UpdateDebtInput,
-  CreateDebtPaymentInput,
+  createDebtEntrySchema,
+  updateDebtEntrySchema,
+  CreateDebtEntryInput,
+  UpdateDebtEntryInput,
 } from '@/lib/validations/debt';
 import type {
-  DebtType,
-  DebtStatus,
-  DebtDTO,
-  DebtPaymentDTO,
+  DebtEntryType,
+  DebtEntryDTO,
+  DebtContactDTO,
   DebtSummaryDTO,
 } from '@/types/debt.types';
 
-export async function listDebts(filters?: {
-  type?: DebtType | 'all';
-  status?: DebtStatus | 'all';
+export async function listDebtContacts(filters?: {
+  status?: 'all' | 'paona' | 'dena' | 'settled';
   searchQuery?: string;
-}): Promise<DebtDTO[]> {
+}): Promise<DebtContactDTO[]> {
   const supabase = await createClient();
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError || !userData?.user) {
@@ -31,35 +27,82 @@ export async function listDebts(filters?: {
   const userId = userData.user.id;
 
   let query = supabase
-    .from('debts')
+    .from('debt_contacts')
     .select(`
       *,
-      debt_payments (*)
+      debt_entries (*)
     `)
     .eq('user_id', userId)
-    .order('created_at', { ascending: false });
-
-  if (filters?.type && filters.type !== 'all') {
-    query = query.eq('type', filters.type);
-  }
-
-  if (filters?.status && filters.status !== 'all') {
-    query = query.eq('status', filters.status);
-  }
+    .order('updated_at', { ascending: false });
 
   if (filters?.searchQuery && filters.searchQuery.trim()) {
-    query = query.ilike('person_name', `%${filters.searchQuery.trim()}%`);
+    query = query.ilike('name', `%${filters.searchQuery.trim()}%`);
   }
 
   const { data, error } = await query;
   if (error) {
+    if (error.code === '42P01' || error.message.includes('Could not find the table') || error.message.includes('relation "public.debt_contacts" does not exist')) {
+      return [];
+    }
+    throw new Error(`Failed to list contacts: ${error.message}`);
+  }
+
+  const contacts = (data || []).map((row) => formatContactDTO(row));
+
+  if (filters?.status && filters.status !== 'all') {
+    return contacts.filter((c) => c.status === filters.status);
+  }
+
+  return contacts;
+}
+
+export async function listAllContacts(): Promise<Array<{ id: string; name: string }>> {
+  const supabase = await createClient();
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData?.user) {
+    throw new Error('Unauthorized');
+  }
+  const userId = userData.user.id;
+
+  const { data, error } = await supabase
+    .from('debt_contacts')
+    .select('id, name')
+    .eq('user_id', userId)
+    .order('name', { ascending: true });
+
+  if (error) {
     if (error.code === '42P01' || error.message.includes('Could not find the table')) {
       return [];
     }
-    throw new Error(`Failed to list debts: ${error.message}`);
+    throw new Error(`Failed to list contacts: ${error.message}`);
   }
 
-  return (data || []).map((row) => formatDebtDTO(row));
+  return data || [];
+}
+
+export async function getContactLedger(contactId: string): Promise<DebtContactDTO> {
+  const supabase = await createClient();
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData?.user) {
+    throw new Error('Unauthorized');
+  }
+  const userId = userData.user.id;
+
+  const { data, error } = await supabase
+    .from('debt_contacts')
+    .select(`
+      *,
+      debt_entries (*)
+    `)
+    .eq('id', contactId)
+    .eq('user_id', userId)
+    .single();
+
+  if (error || !data) {
+    handleDatabaseError(error, 'Contact not found');
+  }
+
+  return formatContactDTO(data, true);
 }
 
 export async function getDebtSummary(): Promise<DebtSummaryDTO> {
@@ -71,267 +114,158 @@ export async function getDebtSummary(): Promise<DebtSummaryDTO> {
   const userId = userData.user.id;
 
   const { data, error } = await supabase
-    .from('debts')
+    .from('debt_contacts')
     .select(`
       *,
-      debt_payments (*)
+      debt_entries (*)
     `)
     .eq('user_id', userId);
 
   if (error) {
-    if (error.code === '42P01' || error.message.includes('Could not find the table')) {
+    if (error.code === '42P01' || error.message.includes('Could not find the table') || error.message.includes('relation "public.debt_contacts" does not exist')) {
       return {
-        total_lent_poisha_str: '0',
-        total_lent_bdt: '৳ 0.00',
-        total_lent_repaid_bdt: '৳ 0.00',
-        total_lent_remaining_bdt: '৳ 0.00',
-        total_borrowed_poisha_str: '0',
-        total_borrowed_bdt: '৳ 0.00',
-        total_borrowed_repaid_bdt: '৳ 0.00',
-        total_borrowed_remaining_bdt: '৳ 0.00',
+        total_paona_poisha_str: '0',
+        total_paona_bdt: '৳ 0.00',
+        total_dena_poisha_str: '0',
+        total_dena_bdt: '৳ 0.00',
         net_balance_poisha_str: '0',
         net_balance_bdt: '৳ 0.00',
-        active_lent_count: 0,
-        active_borrowed_count: 0,
-        settled_count: 0,
+        paona_contacts_count: 0,
+        dena_contacts_count: 0,
+        settled_contacts_count: 0,
+        total_contacts_count: 0,
       };
     }
-    throw new Error(`Failed to calculate debt summary: ${error.message}`);
+    throw new Error(`Failed to calculate summary: ${error.message}`);
   }
 
-  let totalLentPoisha = 0n;
-  let totalLentRepaidPoisha = 0n;
-  let totalBorrowedPoisha = 0n;
-  let totalBorrowedRepaidPoisha = 0n;
-
-  let activeLentCount = 0;
-  let activeBorrowedCount = 0;
+  let totalPaonaPoisha = 0n;
+  let totalDenaPoisha = 0n;
+  let paonaCount = 0;
+  let denaCount = 0;
   let settledCount = 0;
 
   (data || []).forEach((row) => {
-    const totalAmount = BigInt(row.amount_poisha);
-    let repaid = 0n;
-    if (Array.isArray(row.debt_payments)) {
-      row.debt_payments.forEach((p: { amount_poisha: number }) => {
-        repaid += BigInt(p.amount_poisha);
-      });
-    }
+    const contact = formatContactDTO(row);
+    const netPoisha = BigInt(contact.net_balance_poisha_str);
 
-    if (row.status === 'settled') {
-      settledCount++;
+    if (netPoisha > 0n) {
+      totalPaonaPoisha += netPoisha;
+      paonaCount++;
+    } else if (netPoisha < 0n) {
+      totalDenaPoisha += -netPoisha;
+      denaCount++;
     } else {
-      if (row.type === 'lent') {
-        activeLentCount++;
-      } else {
-        activeBorrowedCount++;
-      }
-    }
-
-    if (row.type === 'lent') {
-      totalLentPoisha += totalAmount;
-      totalLentRepaidPoisha += repaid;
-    } else if (row.type === 'borrowed') {
-      totalBorrowedPoisha += totalAmount;
-      totalBorrowedRepaidPoisha += repaid;
+      settledCount++;
     }
   });
 
-  const totalLentRemaining = totalLentPoisha > totalLentRepaidPoisha ? totalLentPoisha - totalLentRepaidPoisha : 0n;
-  const totalBorrowedRemaining =
-    totalBorrowedPoisha > totalBorrowedRepaidPoisha ? totalBorrowedPoisha - totalBorrowedRepaidPoisha : 0n;
-
-  // Net position = Total Lent Remaining (Owed to me, positive asset) - Total Borrowed Remaining (I owe, liability)
-  const netBalancePoisha = totalLentRemaining - totalBorrowedRemaining;
+  const overallNetPoisha = totalPaonaPoisha - totalDenaPoisha;
 
   return {
-    total_lent_poisha_str: totalLentPoisha.toString(),
-    total_lent_bdt: formatPoishaToBDT(totalLentPoisha),
-    total_lent_repaid_bdt: formatPoishaToBDT(totalLentRepaidPoisha),
-    total_lent_remaining_bdt: formatPoishaToBDT(totalLentRemaining),
-    total_borrowed_poisha_str: totalBorrowedPoisha.toString(),
-    total_borrowed_bdt: formatPoishaToBDT(totalBorrowedPoisha),
-    total_borrowed_repaid_bdt: formatPoishaToBDT(totalBorrowedRepaidPoisha),
-    total_borrowed_remaining_bdt: formatPoishaToBDT(totalBorrowedRemaining),
-    net_balance_poisha_str: netBalancePoisha.toString(),
-    net_balance_bdt: formatPoishaToBDT(netBalancePoisha),
-    active_lent_count: activeLentCount,
-    active_borrowed_count: activeBorrowedCount,
-    settled_count: settledCount,
+    total_paona_poisha_str: totalPaonaPoisha.toString(),
+    total_paona_bdt: formatPoishaToBDT(totalPaonaPoisha),
+    total_dena_poisha_str: totalDenaPoisha.toString(),
+    total_dena_bdt: formatPoishaToBDT(totalDenaPoisha),
+    net_balance_poisha_str: overallNetPoisha.toString(),
+    net_balance_bdt: formatPoishaToBDT(overallNetPoisha),
+    paona_contacts_count: paonaCount,
+    dena_contacts_count: denaCount,
+    settled_contacts_count: settledCount,
+    total_contacts_count: (data || []).length,
   };
 }
 
-export async function createDebt(input: CreateDebtInput): Promise<DebtDTO> {
-  const validated = createDebtSchema.parse(input);
+export async function createDebtEntry(input: CreateDebtEntryInput): Promise<DebtEntryDTO> {
+  const validated = createDebtEntrySchema.parse(input);
   const supabase = await createClient();
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError || !userData?.user) {
     throw new Error('Unauthorized');
   }
   const userId = userData.user.id;
+
+  let targetContactId = validated.contact_id;
+
+  // If no contact_id provided, find or create by name
+  if (!targetContactId && validated.person_name) {
+    const cleanName = validated.person_name.trim();
+
+    // Check if contact already exists with same name (case-insensitive)
+    const { data: existingContact } = await supabase
+      .from('debt_contacts')
+      .select('id')
+      .eq('user_id', userId)
+      .ilike('name', cleanName)
+      .maybeSingle();
+
+    if (existingContact) {
+      targetContactId = existingContact.id;
+    } else {
+      const { data: newContact, error: createContactError } = await supabase
+        .from('debt_contacts')
+        .insert({
+          user_id: userId,
+          name: cleanName,
+        })
+        .select('id')
+        .single();
+
+      if (createContactError || !newContact) {
+        handleDatabaseError(createContactError, 'Failed to create person contact');
+      }
+      targetContactId = newContact.id;
+    }
+  }
+
+  if (!targetContactId) {
+    throw new Error('Contact ID could not be determined');
+  }
 
   const poisha = parseDecimalToPoisha(validated.amount_decimal);
 
-  const { data, error } = await supabase
-    .from('debts')
+  const { data: entry, error: insertError } = await supabase
+    .from('debt_entries')
     .insert({
+      contact_id: targetContactId,
       user_id: userId,
-      type: validated.type,
-      person_name: validated.person_name,
+      entry_type: validated.entry_type,
       amount_poisha: Number(poisha),
+      entry_date: validated.entry_date,
       due_date: validated.due_date || null,
-      notes: validated.notes || null,
-      status: 'active',
-    })
-    .select(`
-      *,
-      debt_payments (*)
-    `)
-    .single();
-
-  if (error || !data) {
-    handleDatabaseError(error, 'Failed to create debt record');
-  }
-
-  return formatDebtDTO(data);
-}
-
-export async function updateDebt(input: UpdateDebtInput): Promise<DebtDTO> {
-  const validated = updateDebtSchema.parse(input);
-  const supabase = await createClient();
-  const { data: userData, error: userError } = await supabase.auth.getUser();
-  if (userError || !userData?.user) {
-    throw new Error('Unauthorized');
-  }
-  const userId = userData.user.id;
-
-  const updatePayload: Record<string, unknown> = {
-    updated_at: new Date().toISOString(),
-  };
-
-  if (validated.type) updatePayload.type = validated.type;
-  if (validated.person_name) updatePayload.person_name = validated.person_name;
-  if (validated.amount_decimal) {
-    updatePayload.amount_poisha = Number(parseDecimalToPoisha(validated.amount_decimal));
-  }
-  if (validated.due_date !== undefined) updatePayload.due_date = validated.due_date;
-  if (validated.notes !== undefined) updatePayload.notes = validated.notes;
-  if (validated.status) updatePayload.status = validated.status;
-
-  const { data, error } = await supabase
-    .from('debts')
-    .update(updatePayload)
-    .eq('id', validated.id)
-    .eq('user_id', userId)
-    .select(`
-      *,
-      debt_payments (*)
-    `)
-    .single();
-
-  if (error || !data) {
-    handleDatabaseError(error, 'Failed to update debt record');
-  }
-
-  return formatDebtDTO(data);
-}
-
-export async function deleteDebt(id: string): Promise<void> {
-  const supabase = await createClient();
-  const { data: userData, error: userError } = await supabase.auth.getUser();
-  if (userError || !userData?.user) {
-    throw new Error('Unauthorized');
-  }
-  const userId = userData.user.id;
-
-  const { error } = await supabase.from('debts').delete().eq('id', id).eq('user_id', userId);
-
-  if (error) {
-    handleDatabaseError(error, 'Failed to delete debt record');
-  }
-}
-
-export async function recordDebtPayment(input: CreateDebtPaymentInput): Promise<DebtPaymentDTO> {
-  const validated = createDebtPaymentSchema.parse(input);
-  const supabase = await createClient();
-  const { data: userData, error: userError } = await supabase.auth.getUser();
-  if (userError || !userData?.user) {
-    throw new Error('Unauthorized');
-  }
-  const userId = userData.user.id;
-
-  // 1. Fetch debt record to verify ownership and balance
-  const { data: debt, error: debtError } = await supabase
-    .from('debts')
-    .select(`
-      *,
-      debt_payments (*)
-    `)
-    .eq('id', validated.debt_id)
-    .eq('user_id', userId)
-    .single();
-
-  if (debtError || !debt) {
-    handleDatabaseError(debtError, 'Debt record not found');
-  }
-
-  const paymentPoisha = parseDecimalToPoisha(validated.amount_decimal);
-  const totalDebtPoisha = BigInt(debt.amount_poisha);
-  let currentRepaid = 0n;
-  if (Array.isArray(debt.debt_payments)) {
-    debt.debt_payments.forEach((p: { amount_poisha: number }) => {
-      currentRepaid += BigInt(p.amount_poisha);
-    });
-  }
-
-  const remainingBefore = totalDebtPoisha > currentRepaid ? totalDebtPoisha - currentRepaid : 0n;
-
-  if (paymentPoisha > remainingBefore) {
-    throw new Error(
-      `Payment amount (৳${validated.amount_decimal}) exceeds the remaining balance of ${formatPoishaToBDT(remainingBefore)}`
-    );
-  }
-
-  // 2. Insert payment record
-  const { data: payment, error: insertError } = await supabase
-    .from('debt_payments')
-    .insert({
-      debt_id: validated.debt_id,
-      user_id: userId,
-      amount_poisha: Number(paymentPoisha),
-      payment_date: validated.payment_date,
       notes: validated.notes || null,
     })
     .select()
     .single();
 
-  if (insertError || !payment) {
-    handleDatabaseError(insertError, 'Failed to record payment');
+  if (insertError || !entry) {
+    handleDatabaseError(insertError, 'Failed to record entry');
   }
 
-  // 3. Auto-update status to 'settled' if remaining balance becomes 0
-  const newTotalRepaid = currentRepaid + paymentPoisha;
-  if (newTotalRepaid >= totalDebtPoisha) {
-    await supabase
-      .from('debts')
-      .update({ status: 'settled', updated_at: new Date().toISOString() })
-      .eq('id', validated.debt_id)
-      .eq('user_id', userId);
-  }
+  // Update contact's updated_at timestamp
+  await supabase
+    .from('debt_contacts')
+    .update({ updated_at: new Date().toISOString() })
+    .eq('id', targetContactId)
+    .eq('user_id', userId);
 
   return {
-    id: payment.id,
-    debt_id: payment.debt_id,
-    user_id: payment.user_id,
-    amount_poisha_str: payment.amount_poisha.toString(),
-    amount_decimal: formatPoishaToDecimal(BigInt(payment.amount_poisha)),
-    amount_bdt: formatPoishaToBDT(BigInt(payment.amount_poisha)),
-    payment_date: payment.payment_date,
-    notes: payment.notes,
-    created_at: payment.created_at,
+    id: entry.id,
+    contact_id: entry.contact_id,
+    user_id: entry.user_id,
+    entry_type: entry.entry_type as DebtEntryType,
+    amount_poisha_str: entry.amount_poisha.toString(),
+    amount_decimal: formatPoishaToDecimal(BigInt(entry.amount_poisha)),
+    amount_bdt: formatPoishaToBDT(BigInt(entry.amount_poisha)),
+    entry_date: entry.entry_date,
+    due_date: entry.due_date,
+    notes: entry.notes,
+    created_at: entry.created_at,
   };
 }
 
-export async function deleteDebtPayment(paymentId: string): Promise<void> {
+export async function updateDebtEntry(input: UpdateDebtEntryInput): Promise<DebtEntryDTO> {
+  const validated = updateDebtEntrySchema.parse(input);
   const supabase = await createClient();
   const { data: userData, error: userError } = await supabase.auth.getUser();
   if (userError || !userData?.user) {
@@ -339,125 +273,209 @@ export async function deleteDebtPayment(paymentId: string): Promise<void> {
   }
   const userId = userData.user.id;
 
-  // 1. Fetch payment to know which debt it belonged to
-  const { data: payment, error: fetchError } = await supabase
-    .from('debt_payments')
-    .select('debt_id')
-    .eq('id', paymentId)
+  const updatePayload: Record<string, unknown> = {};
+
+  if (validated.entry_type) updatePayload.entry_type = validated.entry_type;
+  if (validated.amount_decimal) {
+    updatePayload.amount_poisha = Number(parseDecimalToPoisha(validated.amount_decimal));
+  }
+  if (validated.entry_date) updatePayload.entry_date = validated.entry_date;
+  if (validated.due_date !== undefined) updatePayload.due_date = validated.due_date;
+  if (validated.notes !== undefined) updatePayload.notes = validated.notes;
+
+  const { data, error } = await supabase
+    .from('debt_entries')
+    .update(updatePayload)
+    .eq('id', validated.id)
     .eq('user_id', userId)
+    .select()
     .single();
 
-  if (fetchError || !payment) {
-    handleDatabaseError(fetchError, 'Payment record not found');
+  if (error || !data) {
+    handleDatabaseError(error, 'Failed to update entry');
   }
 
-  // 2. Delete payment
-  const { error: deleteError } = await supabase
-    .from('debt_payments')
-    .delete()
-    .eq('id', paymentId)
+  // Update contact's updated_at
+  await supabase
+    .from('debt_contacts')
+    .update({ updated_at: new Date().toISOString() })
+    .eq('id', data.contact_id)
     .eq('user_id', userId);
 
-  if (deleteError) {
-    handleDatabaseError(deleteError, 'Failed to delete payment');
-  }
+  return {
+    id: data.id,
+    contact_id: data.contact_id,
+    user_id: data.user_id,
+    entry_type: data.entry_type as DebtEntryType,
+    amount_poisha_str: data.amount_poisha.toString(),
+    amount_decimal: formatPoishaToDecimal(BigInt(data.amount_poisha)),
+    amount_bdt: formatPoishaToBDT(BigInt(data.amount_poisha)),
+    entry_date: data.entry_date,
+    due_date: data.due_date,
+    notes: data.notes,
+    created_at: data.created_at,
+  };
+}
 
-  // 3. Check remaining balance and re-open debt to 'active' if needed
-  const { data: debt } = await supabase
-    .from('debts')
-    .select(`
-      *,
-      debt_payments (*)
-    `)
-    .eq('id', payment.debt_id)
+export async function deleteDebtEntry(id: string): Promise<void> {
+  const supabase = await createClient();
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData?.user) {
+    throw new Error('Unauthorized');
+  }
+  const userId = userData.user.id;
+
+  const { data: entry } = await supabase
+    .from('debt_entries')
+    .select('contact_id')
+    .eq('id', id)
     .eq('user_id', userId)
     .single();
 
-  if (debt) {
-    let repaid = 0n;
-    if (Array.isArray(debt.debt_payments)) {
-      debt.debt_payments.forEach((p: { amount_poisha: number }) => {
-        repaid += BigInt(p.amount_poisha);
-      });
-    }
-    const total = BigInt(debt.amount_poisha);
-    if (repaid < total && debt.status === 'settled') {
-      await supabase
-        .from('debts')
-        .update({ status: 'active', updated_at: new Date().toISOString() })
-        .eq('id', payment.debt_id)
-        .eq('user_id', userId);
-    }
+  const { error } = await supabase.from('debt_entries').delete().eq('id', id).eq('user_id', userId);
+
+  if (error) {
+    handleDatabaseError(error, 'Failed to delete entry');
+  }
+
+  if (entry?.contact_id) {
+    await supabase
+      .from('debt_contacts')
+      .update({ updated_at: new Date().toISOString() })
+      .eq('id', entry.contact_id)
+      .eq('user_id', userId);
   }
 }
 
-// Helper formatting function
-function formatDebtDTO(row: {
-  id: string;
-  user_id: string;
-  type: string;
-  person_name: string;
-  amount_poisha: number;
-  due_date: string | null;
-  notes: string | null;
-  status: string;
-  created_at: string;
-  updated_at: string;
-  debt_payments?: Array<{
+export async function deleteDebtContact(contactId: string): Promise<void> {
+  const supabase = await createClient();
+  const { data: userData, error: userError } = await supabase.auth.getUser();
+  if (userError || !userData?.user) {
+    throw new Error('Unauthorized');
+  }
+  const userId = userData.user.id;
+
+  const { error } = await supabase
+    .from('debt_contacts')
+    .delete()
+    .eq('id', contactId)
+    .eq('user_id', userId);
+
+  if (error) {
+    handleDatabaseError(error, 'Failed to delete contact');
+  }
+}
+
+// Helper: Formats contact with accumulated ledger balances & running balance history
+function formatContactDTO(
+  row: {
     id: string;
-    debt_id: string;
     user_id: string;
-    amount_poisha: number;
-    payment_date: string;
+    name: string;
+    phone: string | null;
     notes: string | null;
     created_at: string;
-  }>;
-}): DebtDTO {
-  const totalPoisha = BigInt(row.amount_poisha);
-  let repaidPoisha = 0n;
+    updated_at: string;
+    debt_entries?: Array<{
+      id: string;
+      contact_id: string;
+      user_id: string;
+      entry_type: string;
+      amount_poisha: number;
+      entry_date: string;
+      due_date: string | null;
+      notes: string | null;
+      created_at: string;
+    }>;
+  },
+  includeRunningBalances = false
+): DebtContactDTO {
+  const rawEntries = row.debt_entries || [];
 
-  const payments: DebtPaymentDTO[] = (row.debt_payments || [])
-    .sort((a, b) => new Date(b.payment_date).getTime() - new Date(a.payment_date).getTime())
-    .map((p) => {
-      const pPoisha = BigInt(p.amount_poisha);
-      repaidPoisha += pPoisha;
-      return {
-        id: p.id,
-        debt_id: p.debt_id,
-        user_id: p.user_id,
-        amount_poisha_str: p.amount_poisha.toString(),
-        amount_decimal: formatPoishaToDecimal(pPoisha),
-        amount_bdt: formatPoishaToBDT(pPoisha),
-        payment_date: p.payment_date,
-        notes: p.notes,
-        created_at: p.created_at,
-      };
-    });
+  // Sort chronological for balance calculation (oldest first)
+  const sortedAsc = [...rawEntries].sort(
+    (a, b) => new Date(a.entry_date).getTime() - new Date(b.entry_date).getTime() || new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+  );
 
-  const remainingPoisha = totalPoisha > repaidPoisha ? totalPoisha - repaidPoisha : 0n;
-  const percent = totalPoisha > 0n ? Number((repaidPoisha * 100n) / totalPoisha) : 0;
+  let gavePoisha = 0n; // Paona given
+  let receivedPoisha = 0n; // Paona repaid
+  let tookPoisha = 0n; // Dena taken
+  let paidPoisha = 0n; // Dena repaid
+
+  let runningPoisha = 0n; // positive = paona, negative = dena
+
+  const formattedEntries: DebtEntryDTO[] = sortedAsc.map((entry) => {
+    const amount = BigInt(entry.amount_poisha);
+    const type = entry.entry_type as DebtEntryType;
+
+    if (type === 'gave') {
+      gavePoisha += amount;
+      runningPoisha += amount;
+    } else if (type === 'received') {
+      receivedPoisha += amount;
+      runningPoisha -= amount;
+    } else if (type === 'took') {
+      tookPoisha += amount;
+      runningPoisha -= amount;
+    } else if (type === 'paid') {
+      paidPoisha += amount;
+      runningPoisha += amount;
+    }
+
+    const runningStatus: 'paona' | 'dena' | 'settled' =
+      runningPoisha > 0n ? 'paona' : runningPoisha < 0n ? 'dena' : 'settled';
+
+    return {
+      id: entry.id,
+      contact_id: entry.contact_id,
+      user_id: entry.user_id,
+      entry_type: type,
+      amount_poisha_str: entry.amount_poisha.toString(),
+      amount_decimal: formatPoishaToDecimal(amount),
+      amount_bdt: formatPoishaToBDT(amount),
+      entry_date: entry.entry_date,
+      due_date: entry.due_date,
+      notes: entry.notes,
+      created_at: entry.created_at,
+      running_balance_bdt: formatPoishaToBDT(runningPoisha < 0n ? -runningPoisha : runningPoisha),
+      running_balance_status: runningStatus,
+    };
+  });
+
+  // Net calculation: Paona remaining vs Dena remaining
+  const netPoisha = (gavePoisha - receivedPoisha) - (tookPoisha - paidPoisha);
+
+  const status: 'paona' | 'dena' | 'settled' =
+    netPoisha > 0n ? 'paona' : netPoisha < 0n ? 'dena' : 'settled';
+
+  const totalPaona = gavePoisha > receivedPoisha ? gavePoisha - receivedPoisha : 0n;
+  const totalDena = tookPoisha > paidPoisha ? tookPoisha - paidPoisha : 0n;
+
+  // Newest first for UI display
+  const displayEntries = includeRunningBalances
+    ? [...formattedEntries].reverse()
+    : undefined;
+
+  const lastActivityDate = sortedAsc.length > 0 ? sortedAsc[sortedAsc.length - 1].entry_date : null;
 
   return {
     id: row.id,
     user_id: row.user_id,
-    type: row.type as DebtType,
-    person_name: row.person_name,
-    total_amount_poisha_str: totalPoisha.toString(),
-    total_amount_decimal: formatPoishaToDecimal(totalPoisha),
-    total_amount_bdt: formatPoishaToBDT(totalPoisha),
-    repaid_amount_poisha_str: repaidPoisha.toString(),
-    repaid_amount_decimal: formatPoishaToDecimal(repaidPoisha),
-    repaid_amount_bdt: formatPoishaToBDT(repaidPoisha),
-    remaining_amount_poisha_str: remainingPoisha.toString(),
-    remaining_amount_decimal: formatPoishaToDecimal(remainingPoisha),
-    remaining_amount_bdt: formatPoishaToBDT(remainingPoisha),
-    repaid_percent: Math.min(Math.max(percent, 0), 100),
-    due_date: row.due_date,
+    name: row.name,
+    phone: row.phone,
     notes: row.notes,
-    status: row.status as DebtStatus,
     created_at: row.created_at,
     updated_at: row.updated_at,
-    payments,
+    total_paona_poisha_str: totalPaona.toString(),
+    total_paona_bdt: formatPoishaToBDT(totalPaona),
+    total_dena_poisha_str: totalDena.toString(),
+    total_dena_bdt: formatPoishaToBDT(totalDena),
+    net_balance_poisha_str: netPoisha.toString(),
+    net_balance_bdt: formatPoishaToBDT(netPoisha < 0n ? -netPoisha : netPoisha),
+    status,
+    entries_count: rawEntries.length,
+    last_activity_date: lastActivityDate,
+    entries: displayEntries,
   };
 }
 
@@ -466,11 +484,11 @@ function handleDatabaseError(error: { code?: string; message?: string } | null, 
   if (
     error?.code === '42P01' ||
     msg.includes('Could not find the table') ||
-    msg.includes('relation "public.debts" does not exist') ||
-    msg.includes('relation "public.debt_payments" does not exist')
+    msg.includes('relation "public.debt_contacts" does not exist') ||
+    msg.includes('relation "public.debt_entries" does not exist')
   ) {
     throw new Error(
-      'The "debts" table has not been initialized in your Supabase database yet. Please run the SQL migration in your Supabase SQL Editor.'
+      'The "debt_contacts" and "debt_entries" tables have not been initialized in your Supabase database yet. Please run the SQL migration in your Supabase SQL Editor.'
     );
   }
   throw new Error(`${defaultMsg}: ${msg || 'Unknown error'}`);

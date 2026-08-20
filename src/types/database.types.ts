@@ -3,8 +3,7 @@ export type ExpenseBucket = 'needs' | 'wants';
 export type SavingBucket = 'savings';
 export type TransactionBucket = ExpenseBucket | SavingBucket | null;
 
-export type DebtType = 'lent' | 'borrowed';
-export type DebtStatus = 'active' | 'settled';
+export type DebtEntryType = 'gave' | 'took' | 'received' | 'paid';
 
 export type Json =
   | string
@@ -82,6 +81,80 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      debt_contacts: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          notes: string | null
+          phone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      debt_entries: {
+        Row: {
+          amount_poisha: number
+          contact_id: string
+          created_at: string
+          due_date: string | null
+          entry_date: string
+          entry_type: string
+          id: string
+          notes: string | null
+          user_id: string
+        }
+        Insert: {
+          amount_poisha: number
+          contact_id: string
+          created_at?: string
+          due_date?: string | null
+          entry_date?: string
+          entry_type: string
+          id?: string
+          notes?: string | null
+          user_id: string
+        }
+        Update: {
+          amount_poisha?: number
+          contact_id?: string
+          created_at?: string
+          due_date?: string | null
+          entry_date?: string
+          entry_type?: string
+          id?: string
+          notes?: string | null
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "debt_entries_contact_id_fkey"
+            columns: ["contact_id"]
+            isOneToOne: false
+            referencedRelation: "debt_contacts"
+            referencedColumns: ["id"]
+          }
+        ]
       }
       debts: {
         Row: {

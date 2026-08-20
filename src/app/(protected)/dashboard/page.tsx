@@ -181,32 +181,32 @@ export default function DashboardPage() {
             <div>
               <div className="flex items-center gap-2">
                 <h2 className="text-xs sm:text-sm font-bold text-slate-200 uppercase tracking-wider">
-                  Lend & Borrow Overview
+                  দেনা - পাওনা (Dena - Paona)
                 </h2>
                 <span className="text-[10px] font-bold text-emerald-400 px-2 py-0.5 rounded-md bg-emerald-500/10">
-                  Active
+                  খতিয়ান
                 </span>
               </div>
               <p className="text-[11px] text-slate-400 mt-0.5">
-                Track money lent, borrowed debts, and settlement progress
+                ব্যক্তিভিত্তিক ধারের হিসাব ও মোট দেনা-পাওনার স্থিতি
               </p>
             </div>
           </div>
 
           <div className="flex items-center gap-4 sm:gap-6 justify-between sm:justify-end border-t sm:border-t-0 border-slate-800/80 pt-3 sm:pt-0">
             <div>
-              <span className="text-[10px] text-slate-500 font-semibold block uppercase">Owed to you</span>
+              <span className="text-[10px] text-slate-500 font-semibold block uppercase">পাওনা (Owed to you)</span>
               <span className="text-xs sm:text-sm font-bold text-emerald-400 flex items-center gap-0.5">
                 <ArrowUpRight className="w-3 h-3" />
-                {debtSummary.total_lent_remaining_bdt}
+                {debtSummary.total_paona_bdt}
               </span>
             </div>
 
             <div>
-              <span className="text-[10px] text-slate-500 font-semibold block uppercase">You owe</span>
+              <span className="text-[10px] text-slate-500 font-semibold block uppercase">দেনা (You owe)</span>
               <span className="text-xs sm:text-sm font-bold text-rose-400 flex items-center gap-0.5">
                 <ArrowDownLeft className="w-3 h-3" />
-                {debtSummary.total_borrowed_remaining_bdt}
+                {debtSummary.total_dena_bdt}
               </span>
             </div>
 
